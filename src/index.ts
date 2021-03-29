@@ -2,22 +2,25 @@ import { config } from 'dotenv';
 import express, { Request, Response } from 'express';
 import routes from './routes';
 import middlewares from './middlewares';
+import { Socket } from 'socket.io';
 
 config();
 
 const app = express();
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const http = require('http').Server(app);
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const io = require('socket.io')(http);
 
-export const replyError = (status: number, message: string, req: Request, res: Response) => {
+export const replyError = (status: number, message: string, req: Request, res: Response): void => {
     res.status(status).send({
         error: true,
         message
     });
 };
 
-export const replyData = (data: unknown, req: Request, res: Response) => {
+export const replyData = (data: unknown, req: Request, res: Response): void => {
     res.status(200).send({
         error: false,
         ping_ms: Date.now() - req.startTime,
@@ -42,8 +45,8 @@ app.get('*', (req, res) => {
     });
 });
 
-io.on('connection', (socket: any) => {
-    console.log('connected')
+io.on('connection', (socket: Socket) => {
+    console.log('connected', socket.id);
 });
 
 http.listen(process.env.API_PORT, function() {

@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import database from '../database';
 import { replyData } from '..';
 
 const authRouter = Router();

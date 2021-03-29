@@ -1,7 +1,7 @@
 import { Express } from "express";
 import { replyError } from "..";
 
-export default (app: Express) => {
+export default (app: Express): void => {
 
     app.use((req, res, next) => {
 

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import database from '../database';
-import { replyData } from '..';
+import { replyData } from '../';
 
 const guildsRouter = Router();
 
