@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import guildsRouter from './guild.routes';
+import guildsRouter from './guilds.routes';
 
 const routes = Router();
 

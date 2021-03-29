@@ -1,6 +1,7 @@
 import { config } from 'dotenv';
 import express, { Request, Response } from 'express';
 import routes from './routes';
+import middlewares from './middlewares';
 
 config();
 
@@ -13,12 +14,9 @@ export const replyData = (data: unknown, req: Request, res: Response) => {
         ping_ms: Date.now() - req.startTime,
         data
     });
-}
+};
 
-app.use((req, res, next) => {
-    req.startTime = Date.now();
-    next();
-});
+middlewares(app);
 app.use(routes);
 
 app.get('/', (req, res) => {
