@@ -1,9 +1,28 @@
 import { Router } from 'express';
+import database from '../database';
+import { replyData } from '../';
 
-const usersRouter = Router();
+const guildsRouter = Router();
 
-usersRouter.get('/', (req, res) => {
-  return res.json("OK");
+guildsRouter.get('/:guildID/settings', async (req, res) => {
+
+    const guildID = req.params.guildID;
+    const guildSettings = await database.fetchGuildSettings(guildID);
+
+    replyData(guildSettings, req, res);
+
 });
 
-export default usersRouter;
+guildsRouter.get('/:guildID/blacklisted', async (req, res) => {
+
+    const guildID = req.params.guildID;
+    const guildBlacklistedUsers = await database.fetchGuildBlacklistedUsers(guildID);
+
+    res.send({
+        error: false,
+        data: guildBlacklistedUsers
+    });
+
+});
+
+export default guildsRouter;
