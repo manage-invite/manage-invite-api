@@ -7,11 +7,13 @@
   "dependencies": {
     "@manage-invite/manage-invite-db-client": "^1.0.5",
     "dotenv": "^8.2.0",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "socket.io": "^4.0.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.11",
     "@types/ioredis": "^4.22.1",
-    "@types/pg": "^7.14.11"
+    "@types/pg": "^7.14.11",
+    "socket.io-client": "^4.0.0"
   }
 }

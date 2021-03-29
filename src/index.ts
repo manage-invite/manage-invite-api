@@ -6,10 +6,19 @@ import middlewares from './middlewares';
 config();
 
 const app = express();
-const port = process.env.API_PORT!;
+
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
+
+export const replyError = (status: number, message: string, req: Request, res: Response) => {
+    res.status(status).send({
+        error: true,
+        message
+    });
+};
 
 export const replyData = (data: unknown, req: Request, res: Response) => {
-    res.send({
+    res.status(200).send({
         error: false,
         ping_ms: Date.now() - req.startTime,
         data
@@ -33,4 +42,10 @@ app.get('*', (req, res) => {
     });
 });
 
-app.listen(port, () => console.log(`ManageInvite API is listening on ${port}`));
+io.on('connection', (socket: any) => {
+    console.log('connected')
+});
+
+http.listen(process.env.API_PORT, function() {
+    console.log("listening on *:3000");
+});
