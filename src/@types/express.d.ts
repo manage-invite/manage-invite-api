@@ -1,8 +1,10 @@
-import { Server } from "socket.io";
 
 declare namespace Express {
+
+    import { Server } from "socket.io";
+
     export interface Request {
        startTime: number;
-       socketIO: Server;
+       socketio: Server;
     }
 }

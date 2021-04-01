@@ -1,7 +1,6 @@
 import { config } from 'dotenv';
 import express, { Request, Response } from 'express';
 import routes from './routes';
-import middlewares from './middlewares';
 import { Socket } from 'socket.io';
 
 config();
@@ -11,9 +10,14 @@ const app = express();
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const http = require('http').Server(app);
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const io = require('socket.io')(http);
+const io = require('socket.io')(http, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
 
-export const replyError = (status: number, message: string, req: Request, res: Response): void => {
+export const replyError = (status: number, message: string, res: Response): void => {
     res.status(status).send({
         error: true,
         message
@@ -28,7 +32,14 @@ export const replyData = (data: unknown, req: Request, res: Response): void => {
     });
 };
 
-middlewares(app);
+app.use((req, res, next) => {
+
+    req.startTime = Date.now();
+    req.socketio = io;
+
+    next();
+});
+
 app.use(routes);
 
 app.get('/', (req, res) => {
@@ -50,5 +61,5 @@ io.on('connection', (socket: Socket) => {
 });
 
 http.listen(process.env.API_PORT, function() {
-    console.log("listening on *:3000");
+    console.log("listening on *:"+process.env.API_PORT);
 });

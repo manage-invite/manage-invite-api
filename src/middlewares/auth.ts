@@ -1,17 +1,11 @@
-import { Express } from "express";
+import { NextFunction, Response } from "express";
 import { replyError } from "..";
 
-export default (app: Express): void => {
+export default (req: Request, res: Response, next: NextFunction): void => {
 
-    app.use((req, res, next) => {
+    const apiKey = req.headers.get('authorization')
+    if (!apiKey) return replyError(403, 'Missing Authorization header', res);
 
-        if (req.path.startsWith('/auth')) return next();
-
-        const apiKey = req.headers['authorization'];
-        if (!apiKey) {
-            return replyError(403, 'Missing Authorization header', req, res);
-        }
-
-    });
+    next();
 
 };
