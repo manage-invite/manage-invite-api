@@ -1,9 +1,9 @@
 import { config } from 'dotenv';
+config();
+
 import express, { Request, Response } from 'express';
 import routes from './routes';
 import { Socket } from 'socket.io';
-
-config();
 
 const app = express();
 
