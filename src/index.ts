@@ -4,6 +4,7 @@ config();
 import express, { Request, Response } from 'express';
 import routes from './routes';
 import { Socket } from 'socket.io';
+import './ipc-server';
 
 const app = express();
 

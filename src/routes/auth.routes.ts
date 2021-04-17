@@ -3,6 +3,8 @@ import btoa from 'btoa';
 import fetch from 'node-fetch';
 import database from '../database';
 import { Permissions } from 'discord.js';
+import { getShardOf } from '../utils';
+import { verifyGuilds } from '../ipc-server';
 
 const authRouter = Router();
 
@@ -15,6 +17,8 @@ interface GuildObject {
 }
 
 authRouter.get('/', async (req, res) => {
+
+    console.log(`[LOGIN] Code = ${req.query.code}`);
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const authFailedURL = `${process.env.DASHBOARD_URL!}?auth_failed=true`;
@@ -77,17 +81,17 @@ authRouter.get('/', async (req, res) => {
             Authorization: `Bearer ${accessToken}`
         }
     });
-    const guildsData = await guildsResponse.json();
+    const guildsData = await guildsResponse.json() as GuildObject[];
 
     const guildPremiumStatuses = await database.fetchGuildsPremiumStatuses(guildsData.map((guild: GuildObject) => guild.id));
-    const guildIDs = await database.fetchBotGuilds();
-   
-    socket.emit('guilds', guildsData.map((guildData: GuildObject) => ({
+    const verifiedGuilds = await verifyGuilds(guildsData.map((guild) => guild.id));
+
+    socket.emit('guilds', guildsData.map((guildData) => ({
         ...guildData,
         isAdmin: new Permissions(guildData.permissions).has('MANAGE_GUILD'),
         isTrial: guildPremiumStatuses.find((s) => s.guildID === guildData.id)?.isTrial,
         isPremium: guildPremiumStatuses.find((s) => s.guildID === guildData.id)?.isPremium,
-        isAdded: guildIDs.some((id) => id === guildData.id),
+        isAdded: verifiedGuilds.includes(guildData.id),
         isWaitingVerification: false,
         // TODO: implement waiting for verification
         iconURL: guildData.icon ? `https://cdn.discordapp.com/icons/${guildData.id}/${guildData.icon}.webp` : null
