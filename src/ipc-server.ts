@@ -18,6 +18,19 @@ export const verifyGuilds = async (guildIDs: string[]): Promise<string[]> => {
     return results.flat() as string[];
 };
 
+export const verifyPermissions = async (userID: string, permissionName: string, guildIDs: string[]): Promise<string[]> => {
+    const results = await Promise.all(
+        getSockets()
+            .map(s => s[1].send({
+                event: 'verifyPermissions',
+                userID,
+                permissionName,
+                guildIDs
+            }, { receptive: true }))
+    );
+    return results.flat() as string[];
+};
+
 server.on('connect', (client: ServerSocket) => {
     // Disconnect clients that do not match our specified client name.
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

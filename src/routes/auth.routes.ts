@@ -1,20 +1,11 @@
 import { Router } from 'express';
 import btoa from 'btoa';
 import fetch from 'node-fetch';
-import database from '../database';
-import { Permissions } from 'discord.js';
-import { getShardOf } from '../utils';
-import { verifyGuilds } from '../ipc-server';
+import { generateDashJWT } from '../utils/jwt';
 
 const authRouter = Router();
 
 const usersRequests = new Set<string>();
-
-interface GuildObject {
-    id: string;
-    icon: string;
-    permissions: number;
-}
 
 authRouter.get('/', async (req, res) => {
 
@@ -75,27 +66,7 @@ authRouter.get('/', async (req, res) => {
         avatarURL: 'https://cdn.discordapp.com/' + (userData.avatar ? `avatars/${userData.id}/${userData.avatar}.webp` : `embed/avatars/${userData.discriminator % 5}.png`)
     });
 
-    const guildsResponse = await fetch('https://discordapp.com/api/users/@me/guilds', {
-        method: 'GET',
-        headers: {
-            Authorization: `Bearer ${accessToken}`
-        }
-    });
-    const guildsData = await guildsResponse.json() as GuildObject[];
-
-    const guildPremiumStatuses = await database.fetchGuildsPremiumStatuses(guildsData.map((guild: GuildObject) => guild.id));
-    const verifiedGuilds = await verifyGuilds(guildsData.map((guild) => guild.id));
-
-    socket.emit('guilds', guildsData.map((guildData) => ({
-        ...guildData,
-        isAdmin: new Permissions(guildData.permissions).has('MANAGE_GUILD'),
-        isTrial: guildPremiumStatuses.find((s) => s.guildID === guildData.id)?.isTrial,
-        isPremium: guildPremiumStatuses.find((s) => s.guildID === guildData.id)?.isPremium,
-        isAdded: verifiedGuilds.includes(guildData.id),
-        isWaitingVerification: false,
-        // TODO: implement waiting for verification
-        iconURL: guildData.icon ? `https://cdn.discordapp.com/icons/${guildData.id}/${guildData.icon}.webp` : null
-    })))
+    socket.emit('jwt', generateDashJWT(userData.id, tokenData.access_token, tokenData.expires_in));
 
     usersRequests.delete(socketID);
 

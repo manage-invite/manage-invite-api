@@ -2,11 +2,16 @@ import { config } from 'dotenv';
 config();
 
 import express, { Request, Response } from 'express';
+import morgan from 'morgan';
+import cors from 'cors';
 import routes from './routes';
 import { Socket } from 'socket.io';
 import './ipc-server';
 
 const app = express();
+
+app.use(cors());
+app.use(morgan('dev'));
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const http = require('http').Server(app);

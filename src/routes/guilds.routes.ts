@@ -1,10 +1,12 @@
 import { Router } from 'express';
 import database from '../database';
 import { replyData } from '../';
+import auth from '../middlewares/auth';
+import permissions from '../middlewares/permissions';
 
 const guildsRouter = Router();
 
-guildsRouter.get('/:guildID/settings', async (req, res) => {
+guildsRouter.get('/:guildID/settings', auth, permissions, async (req, res) => {
 
     const guildID = req.params.guildID;
     const guildSettings = await database.fetchGuildSettings(guildID);
@@ -13,7 +15,7 @@ guildsRouter.get('/:guildID/settings', async (req, res) => {
 
 });
 
-guildsRouter.get('/:guildID/blacklisted', async (req, res) => {
+guildsRouter.get('/:guildID/blacklisted', auth, permissions, async (req, res) => {
 
     const guildID = req.params.guildID;
     const guildBlacklistedUsers = await database.fetchGuildBlacklistedUsers(guildID);
