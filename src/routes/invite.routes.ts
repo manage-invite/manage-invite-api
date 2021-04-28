@@ -1,4 +1,4 @@
-import { query, Router } from 'express';
+import { Router } from 'express';
 
 const inviteRouter = Router();
 

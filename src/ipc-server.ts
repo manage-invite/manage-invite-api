@@ -1,11 +1,29 @@
 /* This is the "veza" server. Used by the API to get data from the shards. Each shard connects to it */
 
 import { NetworkError, NodeMessage, Server, ServerSocket } from 'veza';
+import { getShardOf } from './utils/discord';
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const server = new Server(process.env.IPC_SERVER_NAME!);
 
 const getSockets = () => Array.from(server.sockets).filter(c => /\d+$/.test(c[0]));
+
+interface ChannelData {
+    id: string;
+    name: string;
+}
+
+export const getChannelsOf = async (guildID: string): Promise<ChannelData[]> => {
+    const results = await Promise.all(
+        getSockets()
+            .map(s => s[1].send({
+                event: 'getChannelsOf',
+                guildID,
+                shardID: getShardOf(guildID)
+            }, { receptive: true }))
+    );
+    return results.flat() as ChannelData[];
+}
 
 export const verifyGuilds = async (guildIDs: string[]): Promise<string[]> => {
     const results = await Promise.all(
