@@ -10,7 +10,7 @@ export default (req: Request, res: Response, next: NextFunction): void => {
     if (apiKey.startsWith('Dash')) {
         const key = apiKey.slice(5, apiKey.length);
         const data = decodeJWT(key) as DecodedUserJWT|null;
-        if (!data) return replyError(403, 'Unauthorized', res);
+        if (!data) return replyError(403, 'Unauthorized. User JWT can not be verified.', res);
         req.jwt = key;
         req.jwtType = 'user';
         req.decodedJWT = data;
@@ -19,7 +19,7 @@ export default (req: Request, res: Response, next: NextFunction): void => {
     else if (apiKey.startsWith('Guild')) {
         const key = apiKey.slice(6, apiKey.length);
         const data = decodeJWT(key) as DecodedGuildJWT|null;
-        if (!data) return replyError(403, 'Unauthorized', res);
+        if (!data) return replyError(403, 'Unauthorized. Guild JWT can not be verified.', res);
         req.jwt = key;
         req.jwtType = 'guild';
         req.decodedJWT = data;
