@@ -171,4 +171,13 @@ guildsRouter.post('/:guildID/plugins/:pluginName', checkSchema({
 
 });
 
+guildsRouter.get('/:guildID/subscriptions', auth, permissions, async (req, res) => {
+
+    const guildID = req.params.guildID;
+    const guildSubscriptions = await database.fetchGuildSubscriptions(guildID);
+
+    replyData(guildSubscriptions, req, res);
+
+});
+
 export default guildsRouter;

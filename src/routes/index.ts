@@ -4,6 +4,7 @@ import authRouter from './auth.routes';
 import inviteRouter from './invite.routes';
 import userRouter from './user.routes';
 import metaRouter from './meta.routes';
+import statusRouter from './status.routes';
 
 const routes = Router();
 
@@ -13,5 +14,6 @@ routes.use('/invite', inviteRouter);
 routes.use('/user', userRouter);
 routes.use('/guilds', guildsRouter);
 routes.use('/meta', metaRouter);
+routes.use('/status', statusRouter);
 
 export default routes;

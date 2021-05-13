@@ -13,6 +13,36 @@ interface ChannelData {
     name: string;
 }
 
+interface ShardStatus {
+    id: number;
+    status: string;
+    ram: number;
+    ping: number;
+    serverCount: number;
+}
+
+export const getShardsStatus = async (): Promise<ShardStatus[]> => {
+    const results = await Promise.all(
+        getSockets()
+            .map(s => s[1].send({
+                event: 'getShardStatus'
+            }, { receptive: true }))
+    ) as ShardStatus[];
+    const statuses = [];
+    for (let i = 0; i < (process.env.SHARD_COUNT as unknown as number); i++) {
+        statuses.push(
+            results.find((r) => r.id === i) || {
+                id: i,
+                status: 'Disconnected',
+                ram: 0,
+                ping: 0,
+                serverCount: 0
+            }
+        )
+    }
+    return statuses;
+};
+
 export const getChannelsOf = async (guildID: string): Promise<ChannelData[]> => {
     const results = await Promise.all(
         getSockets()
