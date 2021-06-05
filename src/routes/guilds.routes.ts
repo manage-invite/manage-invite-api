@@ -5,11 +5,48 @@ import auth from '../middlewares/auth';
 import permissions from '../middlewares/permissions';
 import { checkSchema, validationResult } from 'express-validator';
 import availableLanguages from '../languages.json';
-import { getChannelsOf } from '../ipc-server';
+import { fetchUsers, getChannelsOf } from '../ipc-server';
 import { generateGuildJWT } from '../utils/jwt';
 import { createRatelimiter } from '../middlewares/ratelimiter';
 
 const guildsRouter = Router();
+
+// TODO: fix leaderboard response on swagger
+interface CompleteLeaderboardEntry {
+    userID: string;
+    username: string;
+    discriminator: string;
+    avatarURL: string;
+    bonus: number;
+    fake: number;
+    leaves: number;
+    regular: number;
+}
+
+guildsRouter.get('/:guildID/leaderboard', createRatelimiter(5, undefined, 20, true), async (req, res) => {
+
+    const guildID = req.params.guildID;
+    const settings = await database.fetchGuildSettings(guildID);
+    const leaderboard = await database.fetchGuildLeaderboard(guildID, settings.storageID, 20);
+    const users = await fetchUsers(leaderboard.map((u) => u.userID), guildID);
+
+    const newLeaderboard: CompleteLeaderboardEntry[] = [];
+
+    leaderboard.forEach((value) => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const user = users.find((u) => u.id === value.userID)!;
+        const entry = {
+            ...value,
+            username: user.username,
+            discriminator: user.discriminator,
+            avatarURL: user.avatarURL
+        }
+        newLeaderboard.push(entry);
+    });
+
+    replyData(newLeaderboard, req, res);
+
+});
 
 guildsRouter.get('/:guildID/jwt',  auth, createRatelimiter(5), permissions, async (req, res) => {
 

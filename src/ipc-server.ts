@@ -21,6 +21,13 @@ interface ShardStatus {
     serverCount: number;
 }
 
+interface UserData {
+    id: string;
+    username: string;
+    discriminator: string;
+    avatarURL: string;
+}
+
 export const getShardsStatus = async (): Promise<ShardStatus[]> => {
     const results = await Promise.all(
         getSockets()
@@ -77,6 +84,20 @@ export const verifyPermissions = async (userID: string, permissionName: string, 
             }, { receptive: true }))
     );
     return results.flat() as string[];
+};
+
+export const fetchUsers = async (userIDs: string[], guildID?: string): Promise<UserData[]> => {
+    const results = await Promise.all(
+        getSockets()
+            .map(s => s[1].send({
+                event: 'fetchUsers',
+                userIDs,
+                shardID: guildID ? getShardOf(guildID) : null
+            }, { receptive: true }))
+    )
+    console.log(results)
+    // https://stackoverflow.com/a/56757215/11856499
+    return (results.flat() as UserData[]).filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i)
 };
 
 server.on('connect', (client: ServerSocket) => {
