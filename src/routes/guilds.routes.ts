@@ -7,10 +7,11 @@ import { checkSchema, validationResult } from 'express-validator';
 import availableLanguages from '../languages.json';
 import { getChannelsOf } from '../ipc-server';
 import { generateGuildJWT } from '../utils/jwt';
+import { createRatelimiter } from '../middlewares/ratelimiter';
 
 const guildsRouter = Router();
 
-guildsRouter.get('/:guildID/jwt', auth, permissions, async (req, res) => {
+guildsRouter.get('/:guildID/jwt',  auth, createRatelimiter(5), permissions, async (req, res) => {
 
     const guildID = req.params.guildID;
     const token = await database.fetchGuildAPIToken(guildID);
@@ -21,7 +22,7 @@ guildsRouter.get('/:guildID/jwt', auth, permissions, async (req, res) => {
 
 });
 
-guildsRouter.post('/:guildID/jwt', auth, permissions, async (req, res) => {
+guildsRouter.post('/:guildID/jwt', auth, createRatelimiter(3, undefined, 1), permissions, async (req, res) => {
 
     if (req.jwtType === 'guild') return replyError(403, 'Only user JWTs are allowed for this route.', res);
     
@@ -37,7 +38,7 @@ guildsRouter.post('/:guildID/jwt', auth, permissions, async (req, res) => {
 
 });
 
-guildsRouter.get('/:guildID/channels', auth, permissions, async (req, res) => {
+guildsRouter.get('/:guildID/channels', auth, createRatelimiter(3, undefined, 5), permissions, async (req, res) => {
     
     const guildID = req.params.guildID;
     const channels = await getChannelsOf(guildID);
@@ -46,7 +47,7 @@ guildsRouter.get('/:guildID/channels', auth, permissions, async (req, res) => {
     
 });
 
-guildsRouter.get('/:guildID/settings', auth, permissions, async (req, res) => {
+guildsRouter.get('/:guildID/settings', auth, createRatelimiter(3, undefined, 5), permissions, async (req, res) => {
 
     const guildID = req.params.guildID;
     const guildSettings = await database.fetchGuildSettings(guildID);
