@@ -28,3 +28,10 @@ export const generateDashJWT = (userID: string, accessToken: string, expiresIn: 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     }, process.env.JWT_PRIVATE_KEY!);
 };
+
+export const generateGuildJWT = (guildID: string): string => {
+    return jsonwebtoken.sign({
+        guildID
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    }, process.env.JWT_PRIVATE_KEY!);
+}
