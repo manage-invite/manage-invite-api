@@ -23,6 +23,8 @@ interface CompleteLeaderboardEntry {
     regular: number;
 }
 
+const discordIDRegex = /^([0-9]{12,32})$/;
+
 guildsRouter.get('/:guildID/leaderboard', createRatelimiter(5, undefined, 20, true), premium, async (req, res) => {
 
     const guildID = req.params.guildID;
@@ -119,7 +121,7 @@ guildsRouter.post('/:guildID/settings', auth, createRatelimiter(3, undefined, 5)
         isString: true,
         
         matches: {
-            options: /^([0-9]{12,32})$/
+            options: discordIDRegex
         },
         optional: {
             options: {
@@ -158,6 +160,60 @@ guildsRouter.get('/:guildID/blacklisted', auth, permissions, premium, async (req
 
 });
 
+guildsRouter.post('/:guildID/blacklisted/:userID', auth, permissions, premium, checkSchema({
+    userID: {
+        in: 'params',
+        isString: true,
+        matches: {
+            options: discordIDRegex
+        }
+    }
+}), async (req: Request, res: Response) => {
+
+    const guildID = req.params.guildID;
+    const userID = req.params.userID;
+
+    const blacklistedUsers = await database.fetchGuildBlacklistedUsers(guildID);
+    if (blacklistedUsers.includes(userID)) return replyError(400, 'This user is already blacklisted.', res);
+
+    await database.addGuildBlacklistedUser({
+        guildID,
+        userID
+    });
+
+    const newBlacklistedUsers = await database.fetchGuildBlacklistedUsers(guildID);
+
+    replyData(newBlacklistedUsers, req, res);
+
+});
+
+guildsRouter.delete('/:guildID/blacklisted/:userID', auth, permissions, premium, checkSchema({
+    userID: {
+        in: 'params',
+        isString: true,
+        matches: {
+            options: discordIDRegex
+        }
+    }
+}), async (req: Request, res: Response) => {
+
+    const guildID = req.params.guildID;
+    const userID = req.params.userID;
+
+    const blacklistedUsers = await database.fetchGuildBlacklistedUsers(guildID);
+    if (!blacklistedUsers.includes(userID)) return replyError(400, 'This user is not blacklisted.', res);
+
+    await database.removeGuildBlacklistedUser({
+        guildID,
+        userID
+    });
+
+    const newBlacklistedUsers = await database.fetchGuildBlacklistedUsers(guildID);
+
+    replyData(newBlacklistedUsers, req, res);
+
+});
+
 guildsRouter.get('/:guildID/plugins', auth, permissions, premium, async (req, res) => {
 
     const guildID = req.params.guildID;
@@ -176,7 +232,7 @@ guildsRouter.post('/:guildID/plugins/:pluginName', auth, permissions, premium, c
         in: 'body',
         isString: true,
         matches: {
-            options: /^([0-9]{12,32})$/
+            options: discordIDRegex
         }
     },
     mainMessage: {
