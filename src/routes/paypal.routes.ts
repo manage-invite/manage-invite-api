@@ -86,6 +86,8 @@ paypalRouter.post('/ipn', async (req, res) => {
 
             sendPaypalNotification(guildID, guildName, userID, 'subscribed');
 
+            res.sendStatus(200);
+
         }
         if (payload.txn_type === "subscr_payment") {
 
