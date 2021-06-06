@@ -7,7 +7,7 @@ const authRouter = Router();
 
 const usersRequests = new Set<string>();
 
-authRouter.get('/', async (req, res) => {
+authRouter.get('/callback', async (req, res) => {
 
     console.log(`[LOGIN] Code = ${req.query.code}`);
 

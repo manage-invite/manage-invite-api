@@ -2,7 +2,7 @@ import { Router } from 'express';
 
 const inviteRouter = Router();
 
-inviteRouter.get('/', async (req, res) => {
+inviteRouter.get('/callback', async (req, res) => {
     
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const authFailedURL = `${process.env.DASHBOARD_URL!}?bot_added=true`;
