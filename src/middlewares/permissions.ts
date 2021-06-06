@@ -6,6 +6,7 @@ import database from '../database';
 export default async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 
     const guildID = req.params.guildID;
+    if (!/^[0-9]{16,32}$/.test(guildID)) return replyError(400, 'Guild ID can not be verified.', res);
 
     if (req.jwtType === 'guild') {
         const guildAPIToken = await database.fetchGuildAPIToken(guildID);
