@@ -118,7 +118,6 @@ guildsRouter.post('/:guildID/settings', auth, createRatelimiter(3, undefined, 5)
     cmdChannel: {
         in: 'body',
         isString: true,
-        
         matches: {
             options: DISCORD_ID_REGEX
         },
@@ -169,6 +168,13 @@ guildsRouter.post('/:guildID/blacklisted/:userID', auth, permissions, premium, c
     }
 }), async (req: Request, res: Response) => {
 
+    const err = validationResult(req);
+    if (!err.isEmpty()) {
+        const errors = err.mapped();
+        const msg = errors[Object.keys(errors)[0]].msg;
+        return replyError(400, msg, res);
+    }
+
     const guildID = req.params.guildID;
     const userID = req.params.userID;
 
@@ -195,6 +201,13 @@ guildsRouter.delete('/:guildID/blacklisted/:userID', auth, permissions, premium,
         }
     }
 }), async (req: Request, res: Response) => {
+
+    const err = validationResult(req);
+    if (!err.isEmpty()) {
+        const errors = err.mapped();
+        const msg = errors[Object.keys(errors)[0]].msg;
+        return replyError(400, msg, res);
+    }
 
     const guildID = req.params.guildID;
     const userID = req.params.userID;
