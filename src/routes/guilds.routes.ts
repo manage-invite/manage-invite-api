@@ -9,6 +9,7 @@ import { fetchUsers, getChannelsOf } from '../ipc-server';
 import { generateGuildJWT } from '../utils/jwt';
 import { createRatelimiter } from '../middlewares/ratelimiter';
 import premium from '../middlewares/premium';
+import { DISCORD_ID_REGEX } from '../utils/constants';
 
 const guildsRouter = Router();
 
@@ -22,8 +23,6 @@ interface CompleteLeaderboardEntry {
     leaves: number;
     regular: number;
 }
-
-const discordIDRegex = /^([0-9]{12,32})$/;
 
 guildsRouter.get('/:guildID/leaderboard', createRatelimiter(5, undefined, 20, true), premium, async (req, res) => {
 
@@ -121,7 +120,7 @@ guildsRouter.post('/:guildID/settings', auth, createRatelimiter(3, undefined, 5)
         isString: true,
         
         matches: {
-            options: discordIDRegex
+            options: DISCORD_ID_REGEX
         },
         optional: {
             options: {
@@ -165,7 +164,7 @@ guildsRouter.post('/:guildID/blacklisted/:userID', auth, permissions, premium, c
         in: 'params',
         isString: true,
         matches: {
-            options: discordIDRegex
+            options: DISCORD_ID_REGEX
         }
     }
 }), async (req: Request, res: Response) => {
@@ -192,7 +191,7 @@ guildsRouter.delete('/:guildID/blacklisted/:userID', auth, permissions, premium,
         in: 'params',
         isString: true,
         matches: {
-            options: discordIDRegex
+            options: DISCORD_ID_REGEX
         }
     }
 }), async (req: Request, res: Response) => {
@@ -232,7 +231,7 @@ guildsRouter.post('/:guildID/plugins/:pluginName', auth, permissions, premium, c
         in: 'body',
         isString: true,
         matches: {
-            options: discordIDRegex
+            options: DISCORD_ID_REGEX
         }
     },
     mainMessage: {

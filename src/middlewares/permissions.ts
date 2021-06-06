@@ -2,11 +2,12 @@ import { NextFunction, Response, Request } from "express";
 import { replyError } from "..";
 import { verifyPermissions } from "../ipc-server";
 import database from '../database';
+import { DISCORD_ID_REGEX } from "../utils/constants";
 
 export default async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 
     const guildID = req.params.guildID;
-    if (!/^[0-9]{16,32}$/.test(guildID)) return replyError(400, 'Guild ID can not be verified.', res);
+    if (!DISCORD_ID_REGEX.test(guildID)) return replyError(400, 'Guild ID can not be verified.', res);
 
     if (req.jwtType === 'guild') {
         const guildAPIToken = await database.fetchGuildAPIToken(guildID);
