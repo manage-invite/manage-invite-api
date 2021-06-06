@@ -8,6 +8,8 @@ import auth from '../middlewares/auth';
 import { wait } from '../utils/functions';
 import { createRatelimiter } from '../middlewares/ratelimiter';
 
+import { waitingVerification } from './paypal.routes';
+
 const userRouter = Router();
 
 interface GuildObject {
@@ -45,8 +47,7 @@ userRouter.get('/guilds', auth, createRatelimiter(5, undefined, 2), async (req, 
         isTrial: guildPremiumStatuses.find((s) => s.guildID === guildData.id)?.isTrial,
         isPremium: guildPremiumStatuses.find((s) => s.guildID === guildData.id)?.isPremium,
         isAdded: verifiedAddedGuilds.includes(guildData.id),
-        isWaitingVerification: false,
-        // TODO: implement waiting for verification
+        isWaitingVerification: waitingVerification.has(guildData.id),
         iconURL: guildData.icon ? `https://cdn.discordapp.com/icons/${guildData.id}/${guildData.icon}.webp` : null
     })))
 

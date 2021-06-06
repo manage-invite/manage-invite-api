@@ -53,7 +53,7 @@ app.use(routes);
 app.get('/', (req, res) => {
     res.send({
         error: false,
-        message: 'Welcome to the ManageInvite API. Documentation is available at https://manage-invite.xyz/docs.'
+        message: 'Welcome to the ManageInvite API. Documentation is available at https://developer.manage-invite.xyz.'
     });
 });
 

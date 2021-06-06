@@ -100,6 +100,21 @@ export const fetchUsers = async (userIDs: string[], guildID?: string): Promise<U
     return (results.flat() as UserData[]).filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i)
 };
 
+type NotificationType = 'verification' | 'subscribed' | 'paid' | 'dms' | 'cancelled';
+
+export const sendPaypalNotification = (guildID: string, guildName: string, userID: string, notificationType: NotificationType): void => {
+    getSockets()
+        .map(s => s[1].send({
+            event: 'paypalNotification',
+            notificationType,
+            guildID,
+            guildName,
+            userID,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            shardID: getShardOf(process.env.SUPPORT_SERVER_ID!)
+        }))
+}
+
 server.on('connect', (client: ServerSocket) => {
     // Disconnect clients that do not match our specified client name.
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
