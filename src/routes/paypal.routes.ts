@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { replyError } from '..';
 import { fetchUsers, sendPaypalNotification } from '../ipc-server';
 import database from '../database'
+import fetch from 'node-fetch';
 
 export const waitingVerification = new Set();
 
@@ -32,7 +33,6 @@ paypalRouter.get('/callback', async (req, res) => {
 paypalRouter.post('/ipn', async (req, res) => {
 
     const payload = req.body;
-    res.sendStatus(200);
     const payloadCopy = new URLSearchParams(payload);
     payloadCopy.set("cmd", "_notify-validate");
     payloadCopy.set("custom", unescape(payload.custom));
@@ -51,19 +51,28 @@ paypalRouter.post('/ipn', async (req, res) => {
 
         console.log(payload, valid);
 
-        if (!valid) return replyError(401, 'Unauthorized. PayPal payment can not be verified.', res);
+        if (!valid) {
+            res.sendStatus(200);
+            return replyError(401, 'Unauthorized. PayPal payment can not be verified.', res);
+        }
 
         if (payload.txn_type === "subscr_signup"){
 
             if (
                 (payload.mc_amount3 !== "2.00") ||
                 (!paypalEmails.includes(payload.receiver_email))
-            ) return replyError(401, 'Payment has not the right amount or is not sent to the right account.', res);
+            ) {
+                res.sendStatus(200);
+                return replyError(401, 'Payment has not the right amount or is not sent to the right account.', res);
+            }
 
             const paymentData = (payload.custom || "").split(",");
             paymentData.shift();
 
-            if (!paymentData[0]) return replyError(401, 'Payment data has no custom field.', res);
+            if (!paymentData[0]) {
+                res.sendStatus(200);
+                return replyError(401, 'Payment data has no custom field.', res);
+            }
 
             const guildID = paymentData[0];
             const userID = paymentData[1];
@@ -85,12 +94,18 @@ paypalRouter.post('/ipn', async (req, res) => {
             if (
                 (payload.mc_gross !== "2.00") ||
                 (!paypalEmails.includes(payload.receiver_email))
-            ) return replyError(401, 'Payment has not the right amount or is not sent to the right account.', res);
+            ) {
+                res.sendStatus(200);
+                return replyError(401, 'Payment has not the right amount or is not sent to the right account.', res);
+            }
 
             const paymentData = (payload.custom || "").split(",");
             paymentData.shift();
 
-            if (!paymentData[0]) return replyError(401, 'Payment data has no custom field.', res);
+            if (!paymentData[0]) {
+                res.sendStatus(200);
+                return replyError(401, 'Payment data has no custom field.', res);
+            }
 
             const guildID = paymentData[0];
             const userID = paymentData[1];
@@ -138,6 +153,8 @@ paypalRouter.post('/ipn', async (req, res) => {
                     signupID: signupPayment.id
                 });
 
+                res.sendStatus(200);
+
             } else {
 
                 const additionalTime = 30*24*60*60*1000;
@@ -164,6 +181,8 @@ paypalRouter.post('/ipn', async (req, res) => {
                     details: payload
                 });
 
+                res.sendStatus(200);
+
             }
 
             sendPaypalNotification(guildID, guildName, userID, 'paid');
@@ -174,7 +193,10 @@ paypalRouter.post('/ipn', async (req, res) => {
             const paymentData = (payload.custom || "").split(",");
             paymentData.shift();
 
-            if (!paymentData[0]) return replyError(401, 'Payment data has no custom field.', res);
+            if (!paymentData[0]) {
+                res.sendStatus(200);
+                return replyError(401, 'Payment data has no custom field.', res);
+            }
 
             const guildID = paymentData[0];
             const userID = paymentData[1];
@@ -198,6 +220,8 @@ paypalRouter.post('/ipn', async (req, res) => {
                     details: payload
                 });
             }
+
+            res.sendStatus(200);
         }
     });
 

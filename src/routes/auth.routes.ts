@@ -60,6 +60,10 @@ authRouter.get('/callback', async (req, res) => {
         }
     });
     const userData = await userResponse.json();
+    if (!userData) {
+        socket.emit('authFailed');
+        return;
+    }
 
     socket.emit('login', {
         ...userData,
