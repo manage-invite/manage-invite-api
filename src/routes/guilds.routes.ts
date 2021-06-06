@@ -11,7 +11,6 @@ import { createRatelimiter } from '../middlewares/ratelimiter';
 
 const guildsRouter = Router();
 
-// TODO: fix leaderboard response on swagger
 interface CompleteLeaderboardEntry {
     userID: string;
     username: string;
