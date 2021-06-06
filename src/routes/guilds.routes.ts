@@ -8,6 +8,7 @@ import availableLanguages from '../languages.json';
 import { fetchUsers, getChannelsOf } from '../ipc-server';
 import { generateGuildJWT } from '../utils/jwt';
 import { createRatelimiter } from '../middlewares/ratelimiter';
+import premium from '../middlewares/premium';
 
 const guildsRouter = Router();
 
@@ -22,7 +23,7 @@ interface CompleteLeaderboardEntry {
     regular: number;
 }
 
-guildsRouter.get('/:guildID/leaderboard', createRatelimiter(5, undefined, 20, true), async (req, res) => {
+guildsRouter.get('/:guildID/leaderboard', createRatelimiter(5, undefined, 20, true), premium, async (req, res) => {
 
     const guildID = req.params.guildID;
     const settings = await database.fetchGuildSettings(guildID);
@@ -47,7 +48,7 @@ guildsRouter.get('/:guildID/leaderboard', createRatelimiter(5, undefined, 20, tr
 
 });
 
-guildsRouter.get('/:guildID/jwt',  auth, createRatelimiter(5), permissions, async (req, res) => {
+guildsRouter.get('/:guildID/jwt',  auth, createRatelimiter(5), permissions, premium, async (req, res) => {
 
     const guildID = req.params.guildID;
     const token = await database.fetchGuildAPIToken(guildID);
@@ -58,7 +59,7 @@ guildsRouter.get('/:guildID/jwt',  auth, createRatelimiter(5), permissions, asyn
 
 });
 
-guildsRouter.post('/:guildID/jwt', auth, createRatelimiter(3, undefined, 1), permissions, async (req, res) => {
+guildsRouter.post('/:guildID/jwt', auth, createRatelimiter(3, undefined, 1), permissions, premium, async (req, res) => {
 
     if (req.jwtType === 'guild') return replyError(403, 'Only user JWTs are allowed for this route.', res);
     
@@ -74,7 +75,7 @@ guildsRouter.post('/:guildID/jwt', auth, createRatelimiter(3, undefined, 1), per
 
 });
 
-guildsRouter.get('/:guildID/channels', auth, createRatelimiter(3, undefined, 5), permissions, async (req, res) => {
+guildsRouter.get('/:guildID/channels', auth, createRatelimiter(3, undefined, 5), permissions, premium, async (req, res) => {
     
     const guildID = req.params.guildID;
     const channels = await getChannelsOf(guildID);
@@ -83,7 +84,7 @@ guildsRouter.get('/:guildID/channels', auth, createRatelimiter(3, undefined, 5),
     
 });
 
-guildsRouter.get('/:guildID/settings', auth, createRatelimiter(3, undefined, 5), permissions, async (req, res) => {
+guildsRouter.get('/:guildID/settings', auth, createRatelimiter(3, undefined, 5), permissions, premium, async (req, res) => {
 
     const guildID = req.params.guildID;
     const guildSettings = await database.fetchGuildSettings(guildID);
@@ -92,7 +93,7 @@ guildsRouter.get('/:guildID/settings', auth, createRatelimiter(3, undefined, 5),
 
 });
 
-guildsRouter.post('/:guildID/settings', checkSchema({
+guildsRouter.post('/:guildID/settings', auth, createRatelimiter(3, undefined, 5), permissions, premium, checkSchema({
     prefix: {
         in: 'body',
         isString: true,
@@ -126,8 +127,8 @@ guildsRouter.post('/:guildID/settings', checkSchema({
             }
         }
     }
-}), auth, permissions, async (req: Request, res: Response) => {
-    
+}), async (req: Request, res: Response) => {
+
     const err = validationResult(req);
     if (!err.isEmpty()) {
         const errors = err.mapped();
@@ -148,7 +149,7 @@ guildsRouter.post('/:guildID/settings', checkSchema({
 
 });
 
-guildsRouter.get('/:guildID/blacklisted', auth, permissions, async (req, res) => {
+guildsRouter.get('/:guildID/blacklisted', auth, permissions, premium, async (req, res) => {
 
     const guildID = req.params.guildID;
     const guildBlacklistedUsers = await database.fetchGuildBlacklistedUsers(guildID);
@@ -157,7 +158,7 @@ guildsRouter.get('/:guildID/blacklisted', auth, permissions, async (req, res) =>
 
 });
 
-guildsRouter.get('/:guildID/plugins', auth, permissions, async (req, res) => {
+guildsRouter.get('/:guildID/plugins', auth, permissions, premium, async (req, res) => {
 
     const guildID = req.params.guildID;
     const guildPlugins = await database.fetchGuildPlugins(guildID);
@@ -166,7 +167,7 @@ guildsRouter.get('/:guildID/plugins', auth, permissions, async (req, res) => {
 
 });
 
-guildsRouter.post('/:guildID/plugins/:pluginName', checkSchema({
+guildsRouter.post('/:guildID/plugins/:pluginName', auth, permissions, premium, checkSchema({
     enabled: {
         in: 'body',
         isBoolean: true
@@ -207,7 +208,7 @@ guildsRouter.post('/:guildID/plugins/:pluginName', checkSchema({
             options: { min: 1, max: 1900 }
         }
     }
-}), auth, permissions, async (req: Request, res: Response) => {
+}), async (req: Request, res: Response) => {
     
     const err = validationResult(req);
     if (!err.isEmpty()) {
@@ -236,7 +237,7 @@ guildsRouter.post('/:guildID/plugins/:pluginName', checkSchema({
 
 });
 
-guildsRouter.get('/:guildID/subscriptions', auth, permissions, async (req, res) => {
+guildsRouter.get('/:guildID/subscriptions', auth, permissions, premium, async (req, res) => {
 
     const guildID = req.params.guildID;
     const guildSubscriptions = await database.fetchGuildSubscriptions(guildID);

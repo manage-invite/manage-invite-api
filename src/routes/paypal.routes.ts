@@ -113,6 +113,8 @@ paypalRouter.post('/ipn', async (req, res) => {
             const userID = paymentData[1];
             const guildName = paymentData[2];
 
+            waitingVerification.delete(guildID);
+
             const [ user ] = await fetchUsers([ userID ], guildID);
 
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
