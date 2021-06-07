@@ -226,6 +226,30 @@ guildsRouter.delete('/:guildID/blacklisted/:userID', auth, permissions, premium,
 
 });
 
+guildsRouter.get('/:guildID/storages', auth, permissions, premium, async (req, res) => {
+
+    const guildID = req.params.guildID;
+    const guildStorages = await database.fetchGuildStorages(guildID);
+
+    replyData(guildStorages, req, res);
+
+});
+
+guildsRouter.post('/:guildID/storages', auth, permissions, premium, async (req, res) => {
+
+    const guildID = req.params.guildID;
+    await database.removeGuildInvites(guildID);
+
+    const settings = await database.fetchGuildSettings(guildID);
+    const storages = await database.fetchGuildStorages(guildID);
+
+    replyData({
+        storages,
+        settings
+    }, req, res);
+
+});
+
 guildsRouter.get('/:guildID/plugins', auth, permissions, premium, async (req, res) => {
 
     const guildID = req.params.guildID;
