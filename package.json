@@ -9,7 +9,7 @@
     "start": "ts-node-dev --respawn --transpile-only src/index.ts"
   },
   "dependencies": {
-    "@manage-invite/manage-invite-db-client": "1.0.14",
+    "@manage-invite/manage-invite-db-client": "^1.0.15",
     "@types/btoa": "^1.2.3",
     "btoa": "^1.2.1",
     "cors": "^2.8.5",
