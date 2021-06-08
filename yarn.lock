@@ -52,10 +52,10 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@manage-invite/manage-invite-db-client@^1.0.15":
-  version "1.0.15"
-  resolved "https://npm.pkg.github.com/download/@manage-invite/manage-invite-db-client/1.0.15/b98e3980adb8becd19b5e93e9c0cd7a0ec914afc0b2c36eb6c9cc1dacaac1e46#5199809eff0cfcf3a3c21a8ea00efd3db7facee4"
-  integrity sha512-5+wXzJZ0xUFEY5QoFncqDM62vTPrpGYvlorp+10V3dbnM0Z6v3/z1t57jirhbebu5vP5T785Or4/32R7QmyipQ==
+"@manage-invite/manage-invite-db-client@1.0.16":
+  version "1.0.16"
+  resolved "https://npm.pkg.github.com/download/@manage-invite/manage-invite-db-client/1.0.16/17f5fec18119464fc8a9836142f6d5c7897a004e03c4466eef587d217922fa00#44448d3c029cb3dba535bec41378152e9cb830c2"
+  integrity sha512-W4TOwlHpdPTa707TCRGba3yTzdysBGAgOUzXLrbC+H/OBbxD+piZpoNfN2rR7zzi8i+dgni0QeX5lNSwEmvFUQ==
   dependencies:
     change-case "^4.1.2"
     ioredis "^4.24.5"
