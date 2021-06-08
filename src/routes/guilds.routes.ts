@@ -35,7 +35,11 @@ guildsRouter.get('/:guildID/leaderboard', createRatelimiter(5, undefined, 20, tr
 
     leaderboard.forEach((value) => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const user = users.find((u) => u.id === value.userID)!;
+        const user = users.find((u) => u.id === value.userID) || {
+            username: 'Unknown',
+            discriminator: '0000',
+            avatarURL: 'https://cdn.discordapp.com/embed/avatars/0.png'
+        }!;
         const entry = {
             ...value,
             username: user.username,
@@ -105,6 +109,9 @@ guildsRouter.post('/:guildID/settings', auth, createRatelimiter(3, undefined, 5)
                 max: 10
             }
         },
+        withMessage: {
+            options: 'Guild prefix is not valid'
+        },
         optional: true
     },
     language: {
@@ -112,6 +119,9 @@ guildsRouter.post('/:guildID/settings', auth, createRatelimiter(3, undefined, 5)
         isString: true,
         custom: {
             options: (value) => availableLanguages.some((l) => l.name === value)
+        },
+        withMessage: {
+            options: 'Guild language is not valid'
         },
         optional: true
     },
@@ -121,8 +131,12 @@ guildsRouter.post('/:guildID/settings', auth, createRatelimiter(3, undefined, 5)
         matches: {
             options: DISCORD_ID_REGEX
         },
+        withMessage: {
+            options: 'Command channel is not valid'
+        },
         optional: {
             options: {
+                checkFalsy: false,
                 nullable: true
             }
         }
