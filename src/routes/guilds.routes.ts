@@ -145,6 +145,19 @@ guildsRouter.post('/:guildID/settings', auth, createRatelimiter(3, undefined, 5)
                 nullable: true
             }
         }
+    },
+    fakeThreshold: {
+        in: 'body',
+        isInt: {
+            options: {
+                gt: 0
+            }
+        },
+        optional: {
+            options: {
+                nullable: true
+            }
+        }
     }
 }), async (req: Request, res: Response) => {
 
@@ -161,6 +174,7 @@ guildsRouter.post('/:guildID/settings', auth, createRatelimiter(3, undefined, 5)
     if (Object.prototype.hasOwnProperty.call(req.body, 'prefix') && guildSettings.prefix !== req.body.prefix) await database.updateGuildSetting(guildID, 'prefix', req.body.prefix);
     if (Object.prototype.hasOwnProperty.call(req.body, 'language') && guildSettings.language !== req.body.language) await database.updateGuildSetting(guildID, 'language', req.body.language);
     if (Object.prototype.hasOwnProperty.call(req.body, 'cmdChannel') && guildSettings.cmdChannel !== req.body.cmdChannel) await database.updateGuildSetting(guildID, 'cmdChannel', req.body.cmdChannel);
+    if (Object.prototype.hasOwnProperty.call(req.body, 'fakeThreshold') && guildSettings.fakeThreshold !== req.body.fakeThreshold) await database.updateGuildSetting(guildID, 'fakeThreshold', req.body.fakeThreshold);
 
     if (Object.prototype.hasOwnProperty.call(req.body, 'storageID') && guildSettings.storageID !== req.body.storageID) {
         const guildStorages = await database.fetchGuildStorages(guildID);
