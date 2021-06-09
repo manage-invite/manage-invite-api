@@ -99,6 +99,11 @@ guildsRouter.get('/:guildID/settings', auth, createRatelimiter(3, undefined, 5),
 });
 
 guildsRouter.post('/:guildID/settings', auth, createRatelimiter(3, undefined, 5), permissions, premium, checkSchema({
+    storageID: {
+        in: 'body',
+        isString: true,
+        optional: true
+    },
     prefix: {
         in: 'body',
         isString: true,
@@ -156,6 +161,15 @@ guildsRouter.post('/:guildID/settings', auth, createRatelimiter(3, undefined, 5)
     if (Object.prototype.hasOwnProperty.call(req.body, 'prefix') && guildSettings.prefix !== req.body.prefix) await database.updateGuildSetting(guildID, 'prefix', req.body.prefix);
     if (Object.prototype.hasOwnProperty.call(req.body, 'language') && guildSettings.language !== req.body.language) await database.updateGuildSetting(guildID, 'language', req.body.language);
     if (Object.prototype.hasOwnProperty.call(req.body, 'cmdChannel') && guildSettings.cmdChannel !== req.body.cmdChannel) await database.updateGuildSetting(guildID, 'cmdChannel', req.body.cmdChannel);
+
+    if (Object.prototype.hasOwnProperty.call(req.body, 'storageID') && guildSettings.storageID !== req.body.storageID) {
+        const guildStorages = await database.fetchGuildStorages(guildID);
+        if (!guildStorages.some((storage) => storage.storageID === req.body.storageID)) {
+            return replyError(400, 'Storage with this ID can not be found.', res);
+        } else {
+            await database.updateGuildSetting(guildID, 'storageID', req.body.storageID);
+        }
+    }
 
     const newGuildSettings = await database.fetchGuildSettings(guildID);
     
