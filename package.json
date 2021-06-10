@@ -6,7 +6,8 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint . --ext .ts --fix",
-    "start": "ts-node-dev --respawn --transpile-only src/index.ts"
+    "start": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc"
   },
   "dependencies": {
     "@manage-invite/manage-invite-db-client": "1.0.17",
