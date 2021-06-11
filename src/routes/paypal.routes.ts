@@ -114,7 +114,7 @@ paypalRouter.post('/ipn', async (req, res) => {
 
             waitingVerification.delete(guildID);
 
-            const [ user ] = await fetchUsers([ userID ], guildID);
+            const [ user ] = await fetchUsers([ userID ]);
 
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const signupData = (notSentSignup.find((s) => s.guildID === guildID) as NotSentSignupData)!;
@@ -205,7 +205,7 @@ paypalRouter.post('/ipn', async (req, res) => {
             const userID = paymentData[1];
             const guildName = paymentData[2];
 
-            const [ user ] = await fetchUsers([ userID ], guildID);
+            const [ user ] = await fetchUsers([ userID ]);
 
             sendPaypalNotification(guildID, guildName, userID, 'cancelled');
 

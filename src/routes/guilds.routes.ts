@@ -29,7 +29,7 @@ guildsRouter.get('/:guildID/leaderboard', createRatelimiter(5, undefined, 20, tr
     const guildID = req.params.guildID;
     const settings = await database.fetchGuildSettings(guildID);
     const leaderboard = await database.fetchGuildLeaderboard(guildID, settings.storageID, 20);
-    const users = await fetchUsers(leaderboard.map((u) => u.userID), guildID);
+    const users = await fetchUsers(leaderboard.map((u) => u.userID));
 
     const newLeaderboard: CompleteLeaderboardEntry[] = [];
 
