@@ -38,9 +38,9 @@ paypalRouter.post('/ipn', async (req, res) => {
     payloadCopy.set("custom", unescape(payload.custom));
     
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const fetchURL = (process.env.PAYPAL_SANDBOX_ENABLED ? process.env.PAYPAL_SANDBOX_FETCH_URL : process.env.PAYPAL_FETCH_URL)!;
+    const fetchURL = (process.env.PAYPAL_SANDBOX_ENABLED === 'true' ? process.env.PAYPAL_SANDBOX_FETCH_URL : process.env.PAYPAL_FETCH_URL)!;
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const paypalEmails = ((process.env.PAYPAL_SANDBOX_ENABLED ? process.env.PAYPAL_SANDBOX_EMAILS : process.env.PAYPAL_EMAILS)! as string).split(',');
+    const paypalEmails = ((process.env.PAYPAL_SANDBOX_ENABLED === 'true' ? process.env.PAYPAL_SANDBOX_EMAILS : process.env.PAYPAL_EMAILS)! as string).split(',');
 
     fetch(fetchURL, {
         method: "POST",
