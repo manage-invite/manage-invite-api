@@ -86,13 +86,14 @@ export const verifyPermissions = async (userID: string, permissionName: string, 
     return results.flat() as string[];
 };
 
-export const fetchUsers = async (userIDs: string[], guildID?: string): Promise<UserData[]> => {
+export const fetchUsers = async (userIDs: string[]): Promise<UserData[]> => {
+    const shardID = parseInt(getSockets()[0][0].slice('ManageInvite Shard #'.length) || '0');
     const results = await Promise.all(
         getSockets()
             .map(s => s[1].send({
                 event: 'fetchUsers',
                 userIDs,
-                shardID: guildID ? getShardOf(guildID) : null
+                shardID
             }, { receptive: true }))
     )
     console.log(results)
