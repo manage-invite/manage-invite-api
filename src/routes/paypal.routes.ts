@@ -53,7 +53,7 @@ paypalRouter.post('/ipn', async (req, res) => {
 
         if (!valid) {
             res.sendStatus(200);
-            return replyError(401, 'Unauthorized. PayPal payment can not be verified.', res);
+            return console.log('Unauthorized. PayPal payment can not be verified.');
         }
 
         if (payload.txn_type === "subscr_signup"){
@@ -63,7 +63,7 @@ paypalRouter.post('/ipn', async (req, res) => {
                 (!paypalEmails.includes(payload.receiver_email))
             ) {
                 res.sendStatus(200);
-                return replyError(401, 'Payment has not the right amount or is not sent to the right account.', res);
+                return console.log('Payment has not the right amount or is not sent to the right account.');
             }
 
             const paymentData = (payload.custom || "").split(",");
@@ -71,7 +71,7 @@ paypalRouter.post('/ipn', async (req, res) => {
 
             if (!paymentData[0]) {
                 res.sendStatus(200);
-                return replyError(401, 'Payment data has no custom field.', res);
+                return console.log('Payment data has no custom field.');
             }
 
             const guildID = paymentData[0];
@@ -98,7 +98,7 @@ paypalRouter.post('/ipn', async (req, res) => {
                 (!paypalEmails.includes(payload.receiver_email))
             ) {
                 res.sendStatus(200);
-                return replyError(401, 'Payment has not the right amount or is not sent to the right account.', res);
+                return console.log('Payment has not the right amount or is not sent to the right account.');
             }
 
             const paymentData = (payload.custom || "").split(",");
@@ -106,7 +106,7 @@ paypalRouter.post('/ipn', async (req, res) => {
 
             if (!paymentData[0]) {
                 res.sendStatus(200);
-                return replyError(401, 'Payment data has no custom field.', res);
+                return console.log('Payment data has no custom field.');
             }
 
             const guildID = paymentData[0];
@@ -199,7 +199,7 @@ paypalRouter.post('/ipn', async (req, res) => {
 
             if (!paymentData[0]) {
                 res.sendStatus(200);
-                return replyError(401, 'Payment data has no custom field.', res);
+                return console.log('Payment data has no custom field.');
             }
 
             const guildID = paymentData[0];
