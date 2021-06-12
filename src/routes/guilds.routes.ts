@@ -24,7 +24,7 @@ interface CompleteLeaderboardEntry {
     regular: number;
 }
 
-guildsRouter.get('/:guildID/leaderboard', createRatelimiter(5, undefined, 20, true), premium, async (req, res) => {
+guildsRouter.get('/:guildID/leaderboard', auth, permissions, premium, async (req, res) => {
 
     const guildID = req.params.guildID;
     const settings = await database.fetchGuildSettings(guildID);
