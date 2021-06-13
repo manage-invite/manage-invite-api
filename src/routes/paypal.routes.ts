@@ -88,7 +88,7 @@ paypalRouter.post('/ipn', async (req, res) => {
             res.sendStatus(200);
 
         }
-        if (payload.txn_type === "subscr_payment") {
+        else if (payload.txn_type === "subscr_payment") {
 
             console.log(payload);
 
@@ -190,8 +190,7 @@ paypalRouter.post('/ipn', async (req, res) => {
 
             sendPaypalNotification(guildID, guildName, userID, 'paid');
         }
-
-        if (payload.txn_type === "subscr_cancel"){
+        else if (payload.txn_type === "subscr_cancel"){
 
             const paymentData = (payload.custom || "").split(",");
             paymentData.shift();
@@ -226,8 +225,7 @@ paypalRouter.post('/ipn', async (req, res) => {
 
             res.sendStatus(200);
         }
-
-        res.sendStatus(200);
+        else res.sendStatus(200);
 
     });
 
