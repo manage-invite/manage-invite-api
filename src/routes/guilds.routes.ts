@@ -435,7 +435,8 @@ guildsRouter.post('/:guildID/plugins/:pluginName', auth, permissions, premium, c
         isString: true,
         matches: {
             options: DISCORD_ID_REGEX
-        }
+        },
+        optional: true
     },
     mainMessage: {
         in: 'body',
@@ -477,6 +478,11 @@ guildsRouter.post('/:guildID/plugins/:pluginName', auth, permissions, premium, c
 
     const guildID = req.params.guildID;
     const pluginName = req.params.pluginName;
+
+    // TODO: add this to express validator
+    if (pluginName !== 'joinDM' && !req.body.channel) {
+        return replyError(400, 'Invalid value', res);
+    }
     
     await database.updateGuildPlugin(guildID, pluginName, {
         enabled: req.body.enabled,
