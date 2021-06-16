@@ -20,8 +20,8 @@ const http = require('http').Server(app);
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const io = require('socket.io')(http, {
     cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
+        origin: '*',
+        methods: ['GET', 'POST']
     }
 });
 
@@ -69,5 +69,5 @@ io.on('connection', (socket: Socket) => {
 });
 
 http.listen(process.env.API_PORT, function() {
-    console.log("listening on *:"+process.env.API_PORT);
+    console.log('listening on *:'+process.env.API_PORT);
 });

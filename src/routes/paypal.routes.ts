@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { fetchUsers, sendPaypalNotification } from '../ipc-server';
-import database from '../database'
+import database from '../database';
 import fetch from 'node-fetch';
 
 export const waitingVerification = new Set();
@@ -17,7 +17,7 @@ let notSentSignup: NotSentSignupData[] = [];
 const paypalRouter = Router();
 
 paypalRouter.get('/callback', async (req, res) => {
-    const parsedCM = ((req.query.cm || "") as string).split(",");
+    const parsedCM = ((req.query.cm || '') as string).split(',');
     parsedCM.shift();
     const guildID = parsedCM[0];
     const userID = parsedCM[1];
@@ -33,20 +33,20 @@ paypalRouter.post('/ipn', async (req, res) => {
 
     const payload = req.body;
     const payloadCopy = new URLSearchParams(payload);
-    payloadCopy.set("cmd", "_notify-validate");
-    payloadCopy.set("custom", unescape(payload.custom));
-    
+    payloadCopy.set('cmd', '_notify-validate');
+    payloadCopy.set('custom', unescape(payload.custom));
+
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const fetchURL = (process.env.PAYPAL_SANDBOX_ENABLED === 'true' ? process.env.PAYPAL_SANDBOX_FETCH_URL : process.env.PAYPAL_FETCH_URL)!;
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const paypalEmails = ((process.env.PAYPAL_SANDBOX_ENABLED === 'true' ? process.env.PAYPAL_SANDBOX_EMAILS : process.env.PAYPAL_EMAILS)! as string).split(',');
 
     fetch(fetchURL, {
-        method: "POST",
+        method: 'POST',
         body: payloadCopy.toString()
     }).then(async (paypalRes) => {
 
-        const valid = await paypalRes.text() === "VERIFIED";
+        const valid = await paypalRes.text() === 'VERIFIED';
 
         console.log(payload, valid);
 
@@ -55,17 +55,17 @@ paypalRouter.post('/ipn', async (req, res) => {
             return console.log('Unauthorized. PayPal payment can not be verified.');
         }
 
-        if (payload.txn_type === "subscr_signup"){
+        if (payload.txn_type === 'subscr_signup'){
 
             if (
-                (payload.mc_amount3 !== "2.00") ||
+                (payload.mc_amount3 !== '2.00') ||
                 (!paypalEmails.includes(payload.receiver_email))
             ) {
                 res.sendStatus(200);
                 return console.log('Payment has not the right amount or is not sent to the right account.');
             }
 
-            const paymentData = (payload.custom || "").split(",");
+            const paymentData = (payload.custom || '').split(',');
             paymentData.shift();
 
             if (!paymentData[0]) {
@@ -88,19 +88,19 @@ paypalRouter.post('/ipn', async (req, res) => {
             res.sendStatus(200);
 
         }
-        else if (payload.txn_type === "subscr_payment") {
+        else if (payload.txn_type === 'subscr_payment') {
 
             console.log(payload);
 
             if (
-                (payload.mc_gross !== "2.00") ||
+                (payload.mc_gross !== '2.00') ||
                 (!paypalEmails.includes(payload.receiver_email))
             ) {
                 res.sendStatus(200);
                 return console.log('Payment has not the right amount or is not sent to the right account.');
             }
 
-            const paymentData = (payload.custom || "").split(",");
+            const paymentData = (payload.custom || '').split(',');
             paymentData.shift();
 
             if (!paymentData[0]) {
@@ -119,7 +119,7 @@ paypalRouter.post('/ipn', async (req, res) => {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const signupData = (notSentSignup.find((s) => s.guildID === guildID) as NotSentSignupData)!;
             if (signupData) {
-                
+
                 sendPaypalNotification(guildID, guildName, userID, 'dms');
 
                 notSentSignup = notSentSignup.filter((s) => s.guildID !== guildID);
@@ -127,7 +127,7 @@ paypalRouter.post('/ipn', async (req, res) => {
                 const subscription = await database.createGuildSubscription(guildID, {
                     expiresAt: new Date(Date.now()+30*24*60*60*1000),
                     createdAt: new Date(payload.payment_date),
-                    subLabel: "Premium Monthly 1 Guild",
+                    subLabel: 'Premium Monthly 1 Guild',
                     guildsCount: 1
                 });
 
@@ -139,7 +139,7 @@ paypalRouter.post('/ipn', async (req, res) => {
                     transactionID: signupData.payload.txn_id as string,
                     amount: parseInt(signupData.payload.mc_amount3 as string),
                     createdAt: new Date(signupData.payload.subscr_date as string),
-                    type: "paypal_dash_signup_month",
+                    type: 'paypal_dash_signup_month',
                     details: signupData.payload
                 });
 
@@ -151,7 +151,7 @@ paypalRouter.post('/ipn', async (req, res) => {
                     transactionID: payload.txn_id,
                     amount: parseInt(payload.mc_gross),
                     createdAt: new Date(payload.payment_date),
-                    type: "paypal_dash_pmnt_month",
+                    type: 'paypal_dash_pmnt_month',
                     details: payload,
                     signupID: signupPayment.id
                 });
@@ -162,15 +162,15 @@ paypalRouter.post('/ipn', async (req, res) => {
 
                 const additionalTime = 30*24*60*60*1000;
                 const guildSubscriptions = await database.fetchGuildSubscriptions(guildID);
-                let currentSubscription = guildSubscriptions.find((sub) => sub.subLabel === "Premium Monthly 1 Guild");
+                let currentSubscription = guildSubscriptions.find((sub) => sub.subLabel === 'Premium Monthly 1 Guild');
                 if (!currentSubscription){
                     currentSubscription = await database.createGuildSubscription(guildID, {
                         expiresAt: new Date(Date.now()+additionalTime),
                         createdAt: new Date(payload.payment_date),
-                        subLabel: "Premium Monthly 1 Guild",
+                        subLabel: 'Premium Monthly 1 Guild',
                         guildsCount: 1
                     });
-                } else await database.updateGuildSubscription(currentSubscription.id, guildID, "expiresAt",
+                } else await database.updateGuildSubscription(currentSubscription.id, guildID, 'expiresAt',
                     new Date((new Date(currentSubscription.expiresAt).getTime() > Date.now() ? new Date(currentSubscription.expiresAt).getTime() : Date.now()) + additionalTime).toISOString()
                 );
                 await database.createSubscriptionPayment(currentSubscription.id, {
@@ -180,7 +180,7 @@ paypalRouter.post('/ipn', async (req, res) => {
                     transactionID: payload.txn_id,
                     amount: parseInt(payload.mc_gross),
                     createdAt: new Date(payload.payment_date),
-                    type: "paypal_dash_pmnt_month",
+                    type: 'paypal_dash_pmnt_month',
                     details: payload
                 });
 
@@ -190,9 +190,9 @@ paypalRouter.post('/ipn', async (req, res) => {
 
             sendPaypalNotification(guildID, guildName, userID, 'paid');
         }
-        else if (payload.txn_type === "subscr_cancel"){
+        else if (payload.txn_type === 'subscr_cancel'){
 
-            const paymentData = (payload.custom || "").split(",");
+            const paymentData = (payload.custom || '').split(',');
             paymentData.shift();
 
             if (!paymentData[0]) {
@@ -209,7 +209,7 @@ paypalRouter.post('/ipn', async (req, res) => {
             sendPaypalNotification(guildID, guildName, userID, 'cancelled');
 
             const guildSubscriptions = await database.fetchGuildSubscriptions(guildID);
-            const subscriptionID = guildSubscriptions.find((sub) => sub.subLabel === "Premium Monthly 1 Guild")?.id;
+            const subscriptionID = guildSubscriptions.find((sub) => sub.subLabel === 'Premium Monthly 1 Guild')?.id;
             if (subscriptionID) {
                 await database.createSubscriptionPayment(subscriptionID, {
                     payerDiscordID: paymentData[1],
@@ -218,7 +218,7 @@ paypalRouter.post('/ipn', async (req, res) => {
                     transactionID: payload.txn_id,
                     amount: 0,
                     createdAt: new Date(payload.subscr_date),
-                    type: "paypal_dash_cancel_month",
+                    type: 'paypal_dash_cancel_month',
                     details: payload
                 });
             }

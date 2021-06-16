@@ -38,4 +38,4 @@ export const generateGuildJWT = (guildID: string): string => {
         guildID
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     }, process.env.JWT_PRIVATE_KEY!);
-}
+};

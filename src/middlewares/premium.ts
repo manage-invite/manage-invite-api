@@ -1,5 +1,5 @@
-import { NextFunction, Response, Request } from "express";
-import { replyError } from "..";
+import { NextFunction, Response, Request } from 'express';
+import { replyError } from '..';
 import database from '../database';
 
 export default async (req: Request, res: Response, next: NextFunction): Promise<void> => {

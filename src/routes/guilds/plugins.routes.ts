@@ -1,15 +1,15 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response } from 'express';
 
 /* Middlewares */
-import auth from "../../middlewares/auth";
-import permissions from "../../middlewares/permissions";
-import premium from "../../middlewares/premium";
+import auth from '../../middlewares/auth';
+import permissions from '../../middlewares/permissions';
+import premium from '../../middlewares/premium';
 
 /* Helpers */
 import database from '../../database';
-import { replyData, replyError } from "../..";
-import { checkSchema, validationResult } from "express-validator";
-import { DISCORD_ID_REGEX } from "../../utils/constants";
+import { replyData, replyError } from '../..';
+import { checkSchema, validationResult } from 'express-validator';
+import { DISCORD_ID_REGEX } from '../../utils/constants';
 
 export default (guildsRouter: Router): void => {
 
@@ -17,11 +17,11 @@ export default (guildsRouter: Router): void => {
 
         const guildID = req.params.guildID;
         const guildPlugins = await database.fetchGuildPlugins(guildID);
-    
+
         replyData(guildPlugins, req, res);
-    
+
     });
-    
+
     guildsRouter.post('/:guildID/plugins/:pluginName', auth, permissions, premium, checkSchema({
         enabled: {
             in: 'body',
@@ -65,22 +65,22 @@ export default (guildsRouter: Router): void => {
             }
         }
     }), async (req: Request, res: Response) => {
-        
+
         const err = validationResult(req);
         if (!err.isEmpty()) {
             const errors = err.mapped();
             const msg = errors[Object.keys(errors)[0]].msg;
             return replyError(400, msg, res);
         }
-    
+
         const guildID = req.params.guildID;
         const pluginName = req.params.pluginName;
-    
+
         // TODO: add this to express validator
         if (pluginName !== 'joinDM' && !req.body.channel) {
             return replyError(400, 'Invalid value', res);
         }
-        
+
         await database.updateGuildPlugin(guildID, pluginName, {
             enabled: req.body.enabled,
             channel: req.body.channel,
@@ -91,11 +91,11 @@ export default (guildsRouter: Router): void => {
                 oauth2Message: req.body.oauth2Message
             }) : {})
         });
-    
+
         const plugins = await database.fetchGuildPlugins(guildID);
-    
+
         replyData(plugins, req, res);
-    
+
     });
 
-}
+};

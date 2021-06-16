@@ -49,7 +49,7 @@ userRouter.get('/guilds', auth, createRatelimiter(5, undefined, 2), async (req, 
         isAdded: verifiedAddedGuilds.includes(guildData.id),
         isWaitingVerification: waitingVerification.has(guildData.id),
         iconURL: guildData.icon ? `https://cdn.discordapp.com/icons/${guildData.id}/${guildData.icon}.webp` : null
-    })))
+    })));
 
 });
 

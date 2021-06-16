@@ -1,14 +1,14 @@
-import { Router } from "express";
+import { Router } from 'express';
 
 /* Middlewares */
-import auth from "../../middlewares/auth";
-import permissions from "../../middlewares/permissions";
-import premium from "../../middlewares/premium";
+import auth from '../../middlewares/auth';
+import permissions from '../../middlewares/permissions';
+import premium from '../../middlewares/premium';
 
 /* Helpers */
 import database from '../../database';
-import { fetchUsers } from "../../ipc-server";
-import { replyData } from "../..";
+import { fetchUsers } from '../../ipc-server';
+import { replyData } from '../..';
 
 interface CompleteLeaderboardEntry {
     userID: string;
@@ -29,9 +29,9 @@ export default (guildsRouter: Router): void => {
         const settings = await database.fetchGuildSettings(guildID);
         const leaderboard = await database.fetchGuildLeaderboard(guildID, settings.storageID, 20);
         const users = await fetchUsers(leaderboard.map((u) => u.userID));
-    
+
         const newLeaderboard: CompleteLeaderboardEntry[] = [];
-    
+
         leaderboard.forEach((value) => {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const user = users.find((u) => u.id === value.userID) || {
@@ -44,12 +44,12 @@ export default (guildsRouter: Router): void => {
                 username: user.username,
                 discriminator: user.discriminator,
                 avatarURL: user.avatarURL
-            }
+            };
             newLeaderboard.push(entry);
         });
-    
+
         replyData(newLeaderboard, req, res);
-    
+
     });
 
-}
+};

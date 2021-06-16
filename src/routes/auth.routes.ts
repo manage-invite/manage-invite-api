@@ -34,17 +34,17 @@ authRouter.get('/callback', async (req, res) => {
     }
 
     const tokenParams = new URLSearchParams();
-	tokenParams.set("grant_type", "authorization_code");
-	tokenParams.set("code", req.query.code as string);
-	tokenParams.set("redirect_uri", process.env.REDIRECT_URI as string);
-	const tokenResponse = await fetch("https://discord.com/api/oauth2/token", {
-		method: "POST",
-		body: tokenParams.toString(),
-		headers: {
-			Authorization: `Basic ${btoa(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`)}`,
-			"Content-Type": "application/x-www-form-urlencoded"
-		}
-	});
+    tokenParams.set('grant_type', 'authorization_code');
+    tokenParams.set('code', req.query.code as string);
+    tokenParams.set('redirect_uri', process.env.REDIRECT_URI as string);
+    const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
+        method: 'POST',
+        body: tokenParams.toString(),
+        headers: {
+            Authorization: `Basic ${btoa(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`)}`,
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    });
     const tokenData = await tokenResponse.json();
     if (tokenData.error || !tokenData.access_token) {
         socket.emit('authFailed');
@@ -53,7 +53,7 @@ authRouter.get('/callback', async (req, res) => {
     const accessToken = tokenData.access_token;
 
     // TODO: handle ratelimiting
-    const userResponse = await fetch("http://discordapp.com/api/users/@me", {
+    const userResponse = await fetch('http://discordapp.com/api/users/@me', {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${accessToken}`

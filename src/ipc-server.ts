@@ -45,7 +45,7 @@ export const getShardsStatus = async (): Promise<ShardStatus[]> => {
                 ping: 0,
                 serverCount: 0
             }
-        )
+        );
     }
     return statuses;
 };
@@ -60,7 +60,7 @@ export const getChannelsOf = async (guildID: string): Promise<ChannelData[]> => 
             }, { receptive: true }))
     );
     return results.flat() as ChannelData[];
-}
+};
 
 export const verifyGuilds = async (guildIDs: string[]): Promise<string[]> => {
     const results = await Promise.all(
@@ -95,10 +95,10 @@ export const fetchUsers = async (userIDs: string[]): Promise<UserData[]> => {
                 userIDs,
                 shardID
             }, { receptive: true }))
-    )
-    console.log(results)
+    );
+    console.log(results);
     // https://stackoverflow.com/a/56757215/11856499
-    return (results.flat() as UserData[]).filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i)
+    return (results.flat() as UserData[]).filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
 };
 
 type NotificationType = 'verification' | 'subscribed' | 'paid' | 'dms' | 'cancelled';
@@ -113,8 +113,8 @@ export const sendPaypalNotification = (guildID: string, guildName: string, userI
             userID,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             shardID: getShardOf(process.env.SUPPORT_SERVER_ID!)
-        }))
-}
+        }));
+};
 
 server.on('connect', (client: ServerSocket) => {
     // Disconnect clients that do not match our specified client name.

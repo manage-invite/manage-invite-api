@@ -1,14 +1,14 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response } from 'express';
 
 /* Middlewares */
-import auth from "../../middlewares/auth";
-import permissions from "../../middlewares/permissions";
-import premium from "../../middlewares/premium";
+import auth from '../../middlewares/auth';
+import permissions from '../../middlewares/permissions';
+import premium from '../../middlewares/premium';
 
 /* Helpers */
 import database from '../../database';
-import { replyData, replyError } from "../..";
-import { DISCORD_ID_REGEX } from "../../utils/constants";
+import { replyData, replyError } from '../..';
+import { DISCORD_ID_REGEX } from '../../utils/constants';
 import { checkSchema, validationResult } from 'express-validator';
 
 export default (guildsRouter: Router): void => {
@@ -43,4 +43,4 @@ export default (guildsRouter: Router): void => {
     });
 
 
-}
+};

@@ -33,12 +33,12 @@ registerSettingsRoute(guildsRouter);
 registerStoragesRoute(guildsRouter);
 
 guildsRouter.get('/:guildID/channels', auth, createRatelimiter(3, undefined, 5), permissions, premium, async (req, res) => {
-    
+
     const guildID = req.params.guildID;
     const channels = await getChannelsOf(guildID);
 
     replyData(channels, req, res);
-    
+
 });
 
 guildsRouter.get('/:guildID/subscriptions', auth, permissions, premium, async (req, res) => {

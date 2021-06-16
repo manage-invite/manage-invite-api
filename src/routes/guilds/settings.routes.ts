@@ -1,17 +1,17 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response } from 'express';
 
 /* Middlewares */
-import auth from "../../middlewares/auth";
-import permissions from "../../middlewares/permissions";
-import premium from "../../middlewares/premium";
-import { createRatelimiter } from "../../middlewares/ratelimiter";
+import auth from '../../middlewares/auth';
+import permissions from '../../middlewares/permissions';
+import premium from '../../middlewares/premium';
+import { createRatelimiter } from '../../middlewares/ratelimiter';
 
 /* Helpers */
 import database from '../../database';
-import { replyData, replyError } from "../..";
-import { checkSchema, validationResult } from "express-validator";
+import { replyData, replyError } from '../..';
+import { checkSchema, validationResult } from 'express-validator';
 import availableLanguages from '../../languages.json';
-import { DISCORD_ID_REGEX } from "../../utils/constants";
+import { DISCORD_ID_REGEX } from '../../utils/constants';
 
 export default (guildsRouter: Router): void => {
 
@@ -19,11 +19,11 @@ export default (guildsRouter: Router): void => {
 
         const guildID = req.params.guildID;
         const guildSettings = await database.fetchGuildSettings(guildID);
-    
+
         replyData(guildSettings, req, res);
-    
+
     });
-    
+
     guildsRouter.post('/:guildID/settings', auth, createRatelimiter(3, undefined, 5), permissions, premium, checkSchema({
         storageID: {
             in: 'body',
@@ -86,22 +86,22 @@ export default (guildsRouter: Router): void => {
             }
         }
     }), async (req: Request, res: Response) => {
-    
+
         const err = validationResult(req);
         if (!err.isEmpty()) {
             const errors = err.mapped();
             const msg = errors[Object.keys(errors)[0]].msg;
             return replyError(400, msg, res);
         }
-    
+
         const guildID = req.params.guildID;
         const guildSettings = await database.fetchGuildSettings(guildID);
-    
+
         if (Object.prototype.hasOwnProperty.call(req.body, 'prefix') && guildSettings.prefix !== req.body.prefix) await database.updateGuildSetting(guildID, 'prefix', req.body.prefix);
         if (Object.prototype.hasOwnProperty.call(req.body, 'language') && guildSettings.language !== req.body.language) await database.updateGuildSetting(guildID, 'language', req.body.language);
         if (Object.prototype.hasOwnProperty.call(req.body, 'cmdChannel') && guildSettings.cmdChannel !== req.body.cmdChannel) await database.updateGuildSetting(guildID, 'cmdChannel', req.body.cmdChannel);
         if (Object.prototype.hasOwnProperty.call(req.body, 'fakeThreshold') && guildSettings.fakeThreshold !== req.body.fakeThreshold) await database.updateGuildSetting(guildID, 'fakeThreshold', req.body.fakeThreshold);
-    
+
         if (Object.prototype.hasOwnProperty.call(req.body, 'storageID') && guildSettings.storageID !== req.body.storageID) {
             const guildStorages = await database.fetchGuildStorages(guildID);
             if (!guildStorages.some((storage) => storage.storageID === req.body.storageID)) {
@@ -110,11 +110,11 @@ export default (guildsRouter: Router): void => {
                 await database.updateGuildSetting(guildID, 'storageID', req.body.storageID);
             }
         }
-    
+
         const newGuildSettings = await database.fetchGuildSettings(guildID);
-        
+
         replyData(newGuildSettings, req, res);
-    
+
     });
 
-}
+};

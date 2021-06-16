@@ -1,8 +1,8 @@
-import { NextFunction, Response, Request } from "express";
-import { replyError } from "..";
-import { verifyPermissions } from "../ipc-server";
+import { NextFunction, Response, Request } from 'express';
+import { replyError } from '..';
+import { verifyPermissions } from '../ipc-server';
 import database from '../database';
-import { DISCORD_ID_REGEX } from "../utils/constants";
+import { DISCORD_ID_REGEX } from '../utils/constants';
 
 export default async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 
