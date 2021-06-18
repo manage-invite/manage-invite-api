@@ -20,7 +20,10 @@ authRouter.get('/callback', async (req, res) => {
 
     const socketID = req.query.state as string;
 
-    if (usersRequests.has(socketID)) return;
+    if (usersRequests.has(socketID)) {
+        res.send(500);
+        return;
+    }
     usersRequests.add(socketID);
 
     const socket = req.socketio.sockets.sockets.get(socketID);
@@ -29,6 +32,7 @@ authRouter.get('/callback', async (req, res) => {
     socket.emit('authInit');
 
     if (!req.query.code) {
+        res.send(500);
         socket.emit('authFailed');
         return;
     }
@@ -47,6 +51,7 @@ authRouter.get('/callback', async (req, res) => {
     });
     const tokenData = await tokenResponse.json();
     if (tokenData.error || !tokenData.access_token) {
+        res.send(500);
         socket.emit('authFailed');
         return;
     }
@@ -61,18 +66,25 @@ authRouter.get('/callback', async (req, res) => {
     });
     const userData = await userResponse.json();
     if (!userData) {
+        res.send(500);
         socket.emit('authFailed');
         return;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const isStaff = process.env.STAFF_IDS!.split(',').includes(userData.id)!;
+
     socket.emit('login', {
         ...userData,
+        isStaff,
         avatarURL: 'https://cdn.discordapp.com/' + (userData.avatar ? `avatars/${userData.id}/${userData.avatar}.webp` : `embed/avatars/${userData.discriminator % 5}.png`)
     });
 
-    socket.emit('jwt', generateDashJWT(userData.id, tokenData.access_token, tokenData.expires_in));
+    socket.emit('jwt', generateDashJWT(userData.id, isStaff, tokenData.access_token, tokenData.expires_in));
 
     usersRequests.delete(socketID);
+
+    res.send(200);
 
 });
 

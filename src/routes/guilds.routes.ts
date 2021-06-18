@@ -15,6 +15,7 @@ import registerMemberRoute from './guilds/member.routes';
 import registerPluginsRoute from './guilds/plugins.routes';
 import registerSettingsRoute from './guilds/settings.routes';
 import registerStoragesRoute from './guilds/storages.routes';
+import registerAlertsRoute from './guilds/alerts.routes';
 
 /* Helpers */
 import database from '../database';
@@ -31,6 +32,7 @@ registerMemberRoute(guildsRouter);
 registerPluginsRoute(guildsRouter);
 registerSettingsRoute(guildsRouter);
 registerStoragesRoute(guildsRouter);
+registerAlertsRoute(guildsRouter);
 
 guildsRouter.get('/:guildID/channels', auth, createRatelimiter(3, undefined, 5), permissions, premium, async (req, res) => {
 

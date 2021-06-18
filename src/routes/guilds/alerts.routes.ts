@@ -44,13 +44,12 @@ export default (guildsRouter: Router): void => {
                 }
             }
         },
-        up: {
+        type: {
             in: 'body',
-            isBoolean: true
-        },
-        down: {
-            in: 'body',
-            isBoolean: true
+            isString: true,
+            isIn: {
+                options: [['up', 'down']]
+            }
         }
     }), async (req: Request, res: Response) => {
 
@@ -63,12 +62,12 @@ export default (guildsRouter: Router): void => {
 
         const guildID = req.params.guildID;
 
-        const { inviteCount, channelID, up, down, message } = req.body;
+        const { inviteCount, channelID, type, message } = req.body;
 
         const guildAlerts = await database.fetchGuildAlerts(guildID);
-        if (guildAlerts.some((alert) => alert.inviteCount === inviteCount)) return replyError(400, 'There is already an alert for this invite count', res);
+        if (guildAlerts.some((alert) => alert.inviteCount === inviteCount && alert.type === type)) return replyError(400, 'There is already an alert for this invite count', res);
 
-        await database.addGuildAlert(guildID, inviteCount, channelID, message, up, down);
+        await database.addGuildAlert(guildID, inviteCount, channelID, message, type);
 
         const newGuildAlerts = await database.fetchGuildAlerts(guildID);
 
@@ -76,40 +75,8 @@ export default (guildsRouter: Router): void => {
 
     });
 
-    guildsRouter.delete('/:guildID/alerts/:inviteCount', auth, permissions, premium, checkSchema({
-        inviteCount: {
-            in: 'params',
-            isInt: true
-        }
-    }), async (req: Request, res: Response) => {
-
-        const err = validationResult(req);
-        if (!err.isEmpty()) {
-            const errors = err.mapped();
-            const msg = errors[Object.keys(errors)[0]].msg;
-            return replyError(400, msg, res);
-        }
-
-        const guildID = req.params.guildID;
-        const inviteCount = parseInt(req.params.inviteCount);
-
-        const guildAlerts = await database.fetchGuildAlerts(guildID);
-        const guildAlert = guildAlerts.find((alert) => alert.inviteCount === inviteCount);
-        if (!guildAlert) return replyError(400, 'There is no alert with that invite count.', res);
-
-        if (Object.prototype.hasOwnProperty.call(req.body, 'message') && guildAlert.message !== req.body.message) await database.updateGuildAlert(guildID, inviteCount, 'message', req.body.message);
-        if (Object.prototype.hasOwnProperty.call(req.body, 'channelID') && guildAlert.channelID !== req.body.channelID) await database.updateGuildAlert(guildID, inviteCount, 'channelID', req.body.channelID);
-        if (Object.prototype.hasOwnProperty.call(req.body, 'up') && guildAlert.up !== req.body.up) await database.updateGuildAlert(guildID, inviteCount, 'up', req.body.up);
-        if (Object.prototype.hasOwnProperty.call(req.body, 'down') && guildAlert.down !== req.body.down) await database.updateGuildAlert(guildID, inviteCount, 'down', req.body.down);
-
-        const newGuidlAlerts = await database.fetchGuildAlerts(guildID);
-
-        replyData(newGuidlAlerts, req, res);
-
-    });
-
-    guildsRouter.post('/:guildID/alerts/:inviteCount', auth, permissions, premium, checkSchema({
-        inviteCount: {
+    guildsRouter.post('/:guildID/alerts/:alertID', auth, permissions, premium, checkSchema({
+        alertID: {
             in: 'params',
             isInt: true
         },
@@ -121,19 +88,27 @@ export default (guildsRouter: Router): void => {
         channelID: {
             in: 'body',
             isString: true,
-            optional: true,
             matches: {
                 options: DISCORD_ID_REGEX
-            }
-        },
-        up: {
-            in: 'body',
-            isBoolean: true,
+            },
             optional: true
         },
-        down: {
+        inviteCount: {
             in: 'body',
-            isBoolean: true,
+            isInt: {
+                options: {
+                    min: 1,
+                    max: 99999
+                }
+            },
+            optional: true
+        },
+        type: {
+            in: 'body',
+            isString: true,
+            isIn: {
+                options: [['up', 'down']]
+            },
             optional: true
         }
     }), async (req: Request, res: Response) => {
@@ -146,11 +121,47 @@ export default (guildsRouter: Router): void => {
         }
 
         const guildID = req.params.guildID;
-        const inviteCount = parseInt(req.params.inviteCount);
+        const alertID = parseInt(req.params.alertID);
 
         const guildAlerts = await database.fetchGuildAlerts(guildID);
-        if (!guildAlerts.some((alert) => alert.inviteCount === inviteCount)) return replyError(400, 'There is no alert with that invite count.', res);
+        const guildAlert = guildAlerts.find((alert) => alert.id === alertID);
+        if (!guildAlert) return replyError(404, 'There is no alert with that ID', res);
 
+        const duplicatedAlert = guildAlerts.some((alert) => alert.id !== alertID && alert.inviteCount === (req.body.inviteCount || guildAlert.inviteCount) && alert.type === (req.body.type || guildAlert.type));
+        if (duplicatedAlert) return replyError(400, 'There is already an alert with these parameters', res);
+
+        if (Object.prototype.hasOwnProperty.call(req.body, 'inviteCount') && guildAlert.inviteCount !== req.body.inviteCount) await database.updateGuildAlert(guildID, alertID, 'inviteCount', req.body.inviteCount);
+        if (Object.prototype.hasOwnProperty.call(req.body, 'message') && guildAlert.message !== req.body.message) await database.updateGuildAlert(guildID, alertID, 'message', req.body.message);
+        if (Object.prototype.hasOwnProperty.call(req.body, 'channelID') && guildAlert.channelID !== req.body.channelID) await database.updateGuildAlert(guildID, alertID, 'channelID', req.body.channelID);
+        if (Object.prototype.hasOwnProperty.call(req.body, 'alert_type') && guildAlert.type !== req.body.type) await database.updateGuildAlert(guildID, alertID, 'alert_type', req.body.type);
+
+        const newGuidlAlerts = await database.fetchGuildAlerts(guildID);
+
+        replyData(newGuidlAlerts, req, res);
+
+    });
+
+    guildsRouter.delete('/:guildID/alerts/:alertID', auth, permissions, premium, checkSchema({
+        alertID: {
+            in: 'params',
+            isInt: true
+        }
+    }), async (req: Request, res: Response) => {
+
+        const err = validationResult(req);
+        if (!err.isEmpty()) {
+            const errors = err.mapped();
+            const msg = errors[Object.keys(errors)[0]].msg;
+            return replyError(400, msg, res);
+        }
+
+        const guildID = req.params.guildID;
+        const alertID = parseInt(req.params.alertID);
+
+        const guildAlerts = await database.fetchGuildAlerts(guildID);
+        if (!guildAlerts.some((alert) => alert.id === alertID)) return replyError(400, 'There is no alert with that ID', res);
+
+        await database.removeGuildAlert(guildID, alertID);
 
         const newGuidlAlerts = await database.fetchGuildAlerts(guildID);
 
