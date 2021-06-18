@@ -80,7 +80,7 @@ authRouter.get('/callback', async (req, res) => {
         avatarURL: 'https://cdn.discordapp.com/' + (userData.avatar ? `avatars/${userData.id}/${userData.avatar}.webp` : `embed/avatars/${userData.discriminator % 5}.png`)
     });
 
-    socket.emit('jwt', generateDashJWT(userData.id, isStaff, tokenData.access_token, tokenData.expires_in));
+    socket.emit('jwt', generateDashJWT(userData.id, tokenData.access_token, tokenData.expires_in));
 
     usersRequests.delete(socketID);
 
