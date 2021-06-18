@@ -71,12 +71,8 @@ authRouter.get('/callback', async (req, res) => {
         return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const isStaff = process.env.STAFF_IDS!.split(',').includes(userData.id)!;
-
     socket.emit('login', {
         ...userData,
-        isStaff,
         avatarURL: 'https://cdn.discordapp.com/' + (userData.avatar ? `avatars/${userData.id}/${userData.avatar}.webp` : `embed/avatars/${userData.discriminator % 5}.png`)
     });
 
