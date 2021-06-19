@@ -21,6 +21,7 @@ interface GuildObject {
 userRouter.get('/guilds', auth, createRatelimiter(5, undefined, 2), async (req, res) => {
 
     if (req.jwtType !== 'user') return replyError(400, 'Only user can get guilds', res);
+    if (req.decodedJWT.accessTokenExpiresAt < Date.now()) return replyError(401, 'Access token is expired', res);
 
     let guildsData: GuildObject[]|undefined;
     while (!guildsData) {
