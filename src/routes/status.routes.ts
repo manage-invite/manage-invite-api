@@ -11,12 +11,19 @@ statusRouter.get('/shards', async (req, res) => {
     let uptime = await database.redis.getString('uptime');
 
     if (!uptime) {
-        const watchbotStatus = await (await fetch(`https://api.watchbot.app/bot/${process.env.CLIENT_ID}`, {
-            headers: {
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                'AUTH-TOKEN': process.env.WATCHBOT_API_KEY!
-            }
-        })).json();
+        let watchbotStatus;
+        try {
+            watchbotStatus = await (await fetch(`https://api.watchbot.app/bot/${process.env.CLIENT_ID}`, {
+                headers: {
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    'AUTH-TOKEN': process.env.WATCHBOT_API_KEY!
+                }
+            })).json();
+        } catch (e) {
+            watchbotStatus = {
+                '7d': 'N/A'
+            };
+        }
         uptime = watchbotStatus['7d'];
         database.redis.setString('uptime', uptime);
         database.redis.client.expire('uptime', 100);
