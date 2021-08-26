@@ -21,6 +21,7 @@ import registerAlertsRoute from './guilds/alerts.routes';
 import database from '../database';
 import { replyData } from '../';
 import { getChannelsOf } from '../ipc-server';
+import { SubscriptionPayment } from '@manage-invite/manage-invite-db-client/results';
 
 const guildsRouter = Router();
 
@@ -47,8 +48,21 @@ guildsRouter.get('/:guildID/subscriptions', auth, permissions, premium, async (r
 
     const guildID = req.params.guildID;
     const guildSubscriptions = await database.fetchGuildSubscriptions(guildID);
+    const guildPayments: { subID: string, data: SubscriptionPayment }[] = [];
+    for (const subscription of guildSubscriptions) {
+        const payments = await database.fetchSubscriptionPayments(subscription.id);
+        payments.forEach((payment) => {
+            guildPayments.push({
+                subID: subscription.id,
+                data: payment
+            });
+        });
+    }
 
-    replyData(guildSubscriptions, req, res);
+    replyData({
+        subscriptions: guildSubscriptions,
+        payments: guildPayments
+    }, req, res);
 
 });
 
