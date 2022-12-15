@@ -3,7 +3,6 @@ import { replyError } from '..';
 import { verifyPermissions } from '../ipc-server';
 import database from '../database';
 import { DISCORD_ID_REGEX } from '../utils/constants';
-import { PermissionFlagsBits } from 'discord.js';
 
 export default async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 
@@ -15,7 +14,7 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
         if (req.decodedJWT.guildID !== guildID) return replyError(403, 'Unauthorized. Guild JWT does not have access to this guild.', res);
         if (guildAPIToken !== req.jwt) return replyError(403, 'Unauthorized. Guild JWT has been revoked.', res);
     } else if (req.jwtType === 'user') {
-        const verifiedGuilds = await verifyPermissions(req.decodedJWT.userID, PermissionFlagsBits.ManageGuild, [ req.params.guildID ]);
+        const verifiedGuilds = await verifyPermissions(req.decodedJWT.userID, 32n, [ req.params.guildID ]);
         if (!verifiedGuilds.some((verifiedGuildID) => verifiedGuildID === guildID)) return replyError(403, 'Unauthorized. User does not have access to this guild.', res);
     }
 
