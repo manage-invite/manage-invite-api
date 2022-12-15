@@ -39,7 +39,7 @@ userRouter.get('/guilds', auth, createRatelimiter(5, undefined, 2), async (req, 
     }
 
     const guildPremiumStatuses = await database.fetchGuildsPremiumStatuses(guildsData.map((guild: GuildObject) => guild.id));
-    const verifiedAdminGuildIDs = await verifyPermissions(req.decodedJWT.userID, 'MANAGE_GUILD', guildsData.map((guildData) => guildData.id));
+    const verifiedAdminGuildIDs = await verifyPermissions(req.decodedJWT.userID, 32n, guildsData.map((guildData) => guildData.id));
     const verifiedAddedGuilds = await verifyGuilds(guildsData.map((guild) => guild.id));
 
     return res.send(guildsData.map((guildData) => ({
