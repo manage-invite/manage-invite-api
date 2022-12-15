@@ -73,7 +73,7 @@ export const verifyGuilds = async (guildIDs: string[]): Promise<string[]> => {
     return results.flat() as string[];
 };
 
-export const verifyPermissions = async (userID: string, permissionName: string, guildIDs: string[]): Promise<string[]> => {
+export const verifyPermissions = async (userID: string, permissionName: bigint, guildIDs: string[]): Promise<string[]> => {
     const results = await Promise.all(
         getSockets()
             .map(s => s[1].send({
