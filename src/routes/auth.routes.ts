@@ -50,6 +50,7 @@ authRouter.get('/callback', async (req, res) => {
         }
     });
     const tokenData = await tokenResponse.json();
+    console.log(`[LOGIN] Token data = ${JSON.stringify(tokenData)}`);
     if (tokenData.error || !tokenData.access_token) {
         res.send(500);
         socket.emit('authFailed');
@@ -57,8 +58,10 @@ authRouter.get('/callback', async (req, res) => {
     }
     const accessToken = tokenData.access_token;
 
+    console.log(`[LOGIN] Access token = ${accessToken}`);
+
     // TODO: handle ratelimiting
-    const userResponse = await fetch('http://discordapp.com/api/users/@me', {
+    const userResponse = await fetch('https://discord.com/api/users/@me', {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${accessToken}`
