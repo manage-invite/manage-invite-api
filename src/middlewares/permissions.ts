@@ -10,7 +10,7 @@ export default async (req: Request, res: Response, next: NextFunction): Promise<
     if (!DISCORD_ID_REGEX.test(guildID)) return replyError(400, 'Guild ID can not be verified.', res);
 
     if (req.jwtType === 'guild') {
-        const guildAPIToken = await database.fetchGuildAPIToken(guildID);
+        const guildAPIToken = await database.fetchGuildAPIToken(guildID as `${bigint}`);
         if (req.decodedJWT.guildID !== guildID) return replyError(403, 'Unauthorized. Guild JWT does not have access to this guild.', res);
         if (guildAPIToken !== req.jwt) return replyError(403, 'Unauthorized. Guild JWT has been revoked.', res);
     } else if (req.jwtType === 'user') {

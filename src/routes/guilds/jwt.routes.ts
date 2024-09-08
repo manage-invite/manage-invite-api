@@ -15,7 +15,7 @@ export default (guildsRouter: Router): void => {
 
     guildsRouter.get('/:guildID/jwt',  auth, createRatelimiter(5), permissions, premium, async (req, res) => {
 
-        const guildID = req.params.guildID;
+        const guildID = req.params.guildID as `${bigint}`;
         const token = await database.fetchGuildAPIToken(guildID);
 
         return replyData({
@@ -28,7 +28,7 @@ export default (guildsRouter: Router): void => {
 
         if (req.jwtType === 'guild') return replyError(403, 'Only user JWTs are allowed for this route.', res);
 
-        const guildID = req.params.guildID;
+        const guildID = req.params.guildID as `${bigint}`;
 
         const newToken = generateGuildJWT(guildID);
         await database.updateGuildAPIToken(guildID, newToken, req.decodedJWT.userID, new Date());

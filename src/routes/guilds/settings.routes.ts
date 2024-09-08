@@ -17,7 +17,7 @@ export default (guildsRouter: Router): void => {
 
     guildsRouter.get('/:guildID/settings', auth, createRatelimiter(3, undefined, 5), permissions, premium, async (req, res) => {
 
-        const guildID = req.params.guildID;
+        const guildID = req.params.guildID as `${bigint}`;
         const guildSettings = await database.fetchGuildSettings(guildID);
 
         replyData(guildSettings, req, res);
@@ -94,7 +94,7 @@ export default (guildsRouter: Router): void => {
             return replyError(400, msg, res);
         }
 
-        const guildID = req.params.guildID;
+        const guildID = req.params.guildID as `${bigint}`;
         const guildSettings = await database.fetchGuildSettings(guildID);
 
         if (Object.prototype.hasOwnProperty.call(req.body, 'prefix') && guildSettings.prefix !== req.body.prefix) await database.updateGuildSetting(guildID, 'prefix', req.body.prefix);

@@ -10,12 +10,13 @@ import database from '../../database';
 import { replyData, replyError } from '../..';
 import { checkSchema, validationResult } from 'express-validator';
 import { DISCORD_ID_REGEX } from '../../utils/constants';
+import { PluginName } from '@androz2091/manage-invite-db-client/results';
 
 export default (guildsRouter: Router): void => {
 
     guildsRouter.get('/:guildID/plugins', auth, permissions, premium, async (req, res) => {
 
-        const guildID = req.params.guildID;
+        const guildID = req.params.guildID as `${bigint}`;
         const guildPlugins = await database.fetchGuildPlugins(guildID);
 
         replyData(guildPlugins, req, res);
@@ -73,7 +74,7 @@ export default (guildsRouter: Router): void => {
             return replyError(400, msg, res);
         }
 
-        const guildID = req.params.guildID;
+        const guildID = req.params.guildID as `${bigint}`;
         const pluginName = req.params.pluginName;
 
         // TODO: add this to express validator
@@ -81,7 +82,7 @@ export default (guildsRouter: Router): void => {
             return replyError(400, 'Invalid value', res);
         }
 
-        await database.updateGuildPlugin(guildID, pluginName, {
+        await database.updateGuildPlugin(guildID, pluginName as PluginName, {
             enabled: req.body.enabled,
             channel: req.body.channel,
             mainMessage: req.body.mainMessage,

@@ -13,7 +13,7 @@ export default (guildsRouter: Router): void => {
 
     guildsRouter.get('/:guildID/storages', auth, permissions, premium, async (req, res) => {
 
-        const guildID = req.params.guildID;
+        const guildID = req.params.guildID as `${bigint}`;
         const guildStorages = await database.fetchGuildStorages(guildID);
 
         replyData(guildStorages, req, res);
@@ -22,7 +22,7 @@ export default (guildsRouter: Router): void => {
 
     guildsRouter.post('/:guildID/storages', auth, permissions, premium, async (req, res) => {
 
-        const guildID = req.params.guildID;
+        const guildID = req.params.guildID as `${bigint}`;
         await database.removeGuildInvites(guildID);
 
         const settings = await database.fetchGuildSettings(guildID);

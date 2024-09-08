@@ -16,7 +16,7 @@ export default (guildsRouter: Router): void => {
 
     guildsRouter.get('/:guildID/blacklisted', auth, permissions, premium, async (req, res) => {
 
-        const guildID = req.params.guildID;
+        const guildID = req.params.guildID as `${bigint}`;
         const guildBlacklistedUsers = await database.fetchGuildBlacklistedUsers(guildID);
 
         replyData(guildBlacklistedUsers, req, res);
@@ -40,7 +40,7 @@ export default (guildsRouter: Router): void => {
             return replyError(400, msg, res);
         }
 
-        const guildID = req.params.guildID;
+        const guildID = req.params.guildID as `${bigint}`;
         const userID = req.params.userID;
 
         const blacklistedUsers = await database.fetchGuildBlacklistedUsers(guildID);
@@ -74,7 +74,7 @@ export default (guildsRouter: Router): void => {
             return replyError(400, msg, res);
         }
 
-        const guildID = req.params.guildID;
+        const guildID = req.params.guildID as `${bigint}`;
         const userID = req.params.userID;
 
         const blacklistedUsers = await database.fetchGuildBlacklistedUsers(guildID);

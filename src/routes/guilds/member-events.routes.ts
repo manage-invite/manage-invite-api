@@ -30,7 +30,7 @@ export default (guildsRouter: Router): void => {
             return replyError(400, msg, res);
         }
 
-        const guildID = req.params.guildID;
+        const guildID = req.params.guildID as `${bigint}`;
         const userID = req.params.userID;
 
         const memberData = await database.fetchGuildMemberEvents({

@@ -1,6 +1,6 @@
 /* This is the "veza" server. Used by the API to get data from the shards. Each shard connects to it */
 
-import { NetworkError, NodeMessage, Server, ServerSocket } from 'veza';
+import { NetworkError, NodeMessage, Server, ServerSocket, ServerStatus } from 'veza';
 import { getShardOf } from './utils/discord';
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -157,3 +157,10 @@ server.on('message', async (message: NodeMessage) => {
 });
 
 server.listen(process.env.IPC_SERVER_PORT ?? 4000).catch(console.error);
+
+setInterval(() => {
+    if (server.status != ServerStatus.Opened) {
+        console.log('Server is not opened, trying to reopen');
+        server.listen(process.env.IPC_SERVER_PORT ?? 4000).catch(console.error);
+    }
+}, 1000 * 10);

@@ -25,7 +25,7 @@ export default (guildsRouter: Router): void => {
 
     guildsRouter.get('/:guildID/leaderboard', auth, permissions, premium, async (req, res) => {
 
-        const guildID = req.params.guildID;
+        const guildID = req.params.guildID as `${bigint}`;
         const settings = await database.fetchGuildSettings(guildID);
         const leaderboard = await database.fetchGuildLeaderboard(guildID, settings.storageID, 20);
         const users = await fetchUsers(leaderboard.map((u) => u.userID));

@@ -17,7 +17,7 @@ export default (guildsRouter: Router): void => {
     guildsRouter.get('/:guildID/alerts', auth, permissions, premium, async (req, res) => {
 
         const guildID = req.params.guildID;
-        const guildAlerts = await database.fetchGuildAlerts(guildID);
+        const guildAlerts = await database.fetchGuildAlerts(guildID as `${bigint}`);
 
         replyData(guildAlerts, req, res);
 
@@ -60,7 +60,7 @@ export default (guildsRouter: Router): void => {
             return replyError(400, msg, res);
         }
 
-        const guildID = req.params.guildID;
+        const guildID = req.params.guildID as `${bigint}`;
 
         const { inviteCount, channelID, type, message } = req.body;
 
@@ -120,7 +120,7 @@ export default (guildsRouter: Router): void => {
             return replyError(400, msg, res);
         }
 
-        const guildID = req.params.guildID;
+        const guildID = req.params.guildID as `${bigint}`;
         const alertID = parseInt(req.params.alertID);
 
         const guildAlerts = await database.fetchGuildAlerts(guildID);
@@ -155,7 +155,7 @@ export default (guildsRouter: Router): void => {
             return replyError(400, msg, res);
         }
 
-        const guildID = req.params.guildID;
+        const guildID = req.params.guildID as `${bigint}`;
         const alertID = parseInt(req.params.alertID);
 
         const guildAlerts = await database.fetchGuildAlerts(guildID);

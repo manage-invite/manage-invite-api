@@ -2426,7 +2426,7 @@ vary@^1, vary@~1.1.2:
   resolved "https://registry.yarnpkg.com/vary/-/vary-1.1.2.tgz#2299f02c6ded30d4a5961b0b9f74524a18f634fc"
   integrity sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==
 
-veza@^1.1.0:
+veza@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/veza/-/veza-1.2.0.tgz#8ad3ffe90b6272d513ccdff951f60e91c0544101"
   integrity sha512-Ei91fQ5ymWFwwkqKA1mU4sfqgYeFVxPHSnzvXzjuCdsxSj2omesfJcBAlqHQIf8NbeS14o0eegh+0dVATavN3A==

@@ -1,7 +1,7 @@
 import DatabaseHandler from '@androz2091/manage-invite-db-client';
 
 const handler = new DatabaseHandler({
-    port: process.env.REDIS_PORT, // Redis port
+    port: parseInt(process.env.REDIS_PORT!), // Redis port
     host: process.env.REDIS_HOST, // Redis host
     username: process.env.REDIS_USER, // Redis username`
     password: process.env.REDIS_PASSWORD, // Redis password
