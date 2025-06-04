@@ -1,0 +1,30 @@
+services:
+  postgres:
+    image: postgres:12
+    environment:
+      # This is the user your bot will login to the database with
+      POSTGRES_USER: ${PG_USER}
+      # This is the database name which will get created automagically for you.
+      POSTGRES_DB: ${PG_DATABASE}
+      # This is the port the database will use to communicate on.
+      POSTGRES_PORT: '5432'
+      # This is the password your bot will use to authenticate with the database
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+    # ports to expose to your machine (and others)
+    ports:
+      - "5432:5432"
+    # This allows the database to keep its data between being destroyed and re-created
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  redis:
+    image: bitnami/redis:6.2.14
+    container_name: manage-invite-redis
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      - "6379:6379"
+    deploy:
+      replicas: 1
+
+volumes:
+  postgres_data:
