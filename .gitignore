@@ -6,3 +6,6 @@ dist
 
 # Config
 .env
+
+# JetBrains IDE files
+.idea
