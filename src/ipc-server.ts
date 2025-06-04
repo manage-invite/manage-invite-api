@@ -1,12 +1,39 @@
-/* This is the "veza" server. Used by the API to get data from the shards. Each shard connects to it */
+/* This is the Socket.IO server. Used by the API to get data from the shards. Each shard connects to it */
 
-import { NetworkError, NodeMessage, Server, ServerSocket, ServerStatus } from 'veza';
+import { Server } from 'socket.io';
+import { createServer } from 'http';
 import { getShardOf } from './utils/discord';
 
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-const server = new Server(process.env.IPC_SERVER_NAME!);
+const httpServer = createServer();
+const io = new Server(httpServer, {
+    cors: {
+        origin: '*' // You might want to restrict this in production
+    }
+});
 
-const getSockets = () => Array.from(server.sockets).filter(c => /\d+$/.test(c[0]));
+httpServer.listen(process.env.IPC_PORT);
+
+// Store connected sockets by shard ID
+const connectedShards = new Map();
+
+io.on('connection', (socket) => {
+    const { shardID } = socket.handshake.query;
+    connectedShards.set(shardID, socket);
+    console.log(`Shard ${shardID} connected`);
+
+    socket.on('disconnect', () => {
+        // Remove the disconnected shard
+        for (const [shardId, s] of connectedShards.entries()) {
+            if (s === socket) {
+                connectedShards.delete(shardId);
+                console.log(`Shard ${shardId} disconnected`);
+                break;
+            }
+        }
+    });
+});
+
+const getSockets = () => Array.from(connectedShards.entries());
 
 interface ChannelData {
     id: string;
@@ -29,23 +56,32 @@ interface UserData {
 }
 
 export const getShardsStatus = async (): Promise<ShardStatus[]> => {
+    const statuses: ShardStatus[] = [];
+    const sockets = getSockets();
+
     const results = await Promise.all(
-        getSockets()
-            .map(s => s[1].send({
-                event: 'getShardStatus'
-            }, { receptive: true }))
-    ) as ShardStatus[];
-    const statuses = [];
+        sockets.map(([, socket]) =>
+            new Promise<ShardStatus>((resolve) => {
+                socket.once('getShardStatusResponse', (status: ShardStatus) => resolve(status));
+                socket.emit('getShardStatus');
+            })
+        )
+    );
+
+    // Fill in results for all possible shards
     for (let i = 0; i < (process.env.SHARD_COUNT as unknown as number); i++) {
-        statuses.push(
-            results.find((r) => r.id === i) || {
+        const status = results.find(s => s.id === i);
+        if (status) {
+            statuses.push(status);
+        } else {
+            statuses.push({
                 id: i,
                 status: 'Disconnected',
                 ram: 0,
                 ping: 0,
                 serverCount: 0
-            }
-        );
+            });
+        }
     }
     return statuses;
 };
@@ -53,11 +89,14 @@ export const getShardsStatus = async (): Promise<ShardStatus[]> => {
 export const getChannelsOf = async (guildID: string): Promise<ChannelData[]> => {
     const results = await Promise.all(
         getSockets()
-            .map(s => s[1].send({
-                event: 'getChannelsOf',
-                guildID,
-                shardID: getShardOf(guildID)
-            }, { receptive: true }))
+            .map(([, socket]) =>
+                new Promise<ChannelData[]>((resolve) => {
+                    socket.once('getChannelsOfResponse', (channels: ChannelData[]) => {
+                        resolve(channels);
+                    });
+                    socket.emit('getChannelsOf', { guildID, shardID: getShardOf(guildID) });
+                })
+            )
     );
     return results.flat() as ChannelData[];
 };
@@ -65,10 +104,14 @@ export const getChannelsOf = async (guildID: string): Promise<ChannelData[]> => 
 export const verifyGuilds = async (guildIDs: string[]): Promise<string[]> => {
     const results = await Promise.all(
         getSockets()
-            .map(s => s[1].send({
-                event: 'verifyGuilds',
-                guildIDs
-            }, { receptive: true }))
+            .map(([, socket]) =>
+                new Promise<string[]>((resolve) => {
+                    socket.once('verifyGuildsResponse', (verifiedGuilds: string[]) => {
+                        resolve(verifiedGuilds);
+                    });
+                    socket.emit('verifyGuilds', { guildIDs });
+                })
+            )
     );
     return results.flat() as string[];
 };
@@ -76,12 +119,14 @@ export const verifyGuilds = async (guildIDs: string[]): Promise<string[]> => {
 export const verifyPermissions = async (userID: string, permissionName: bigint, guildIDs: string[]): Promise<string[]> => {
     const results = await Promise.all(
         getSockets()
-            .map(s => s[1].send({
-                event: 'verifyPermissions',
-                userID,
-                permissionName,
-                guildIDs
-            }, { receptive: true }))
+            .map(([, socket]) =>
+                new Promise<string[]>((resolve) => {
+                    socket.once('verifyPermissionsResponse', (verifiedGuilds: string[]) => {
+                        resolve(verifiedGuilds);
+                    });
+                    socket.emit('verifyPermissions', { userID, permissionName, guildIDs });
+                })
+            )
     );
     return results.flat() as string[];
 };
@@ -90,14 +135,16 @@ export const fetchUsers = async (userIDs: string[]): Promise<UserData[]> => {
     const shardID = parseInt(getSockets()[0][0].slice('ManageInvite Shard #'.length) || '0');
     const results = await Promise.all(
         getSockets()
-            .map(s => s[1].send({
-                event: 'fetchUsers',
-                userIDs,
-                shardID
-            }, { receptive: true }))
+            .map(([, socket]) =>
+                new Promise<UserData[]>((resolve) => {
+                    socket.once('fetchUsersResponse', (users: UserData[]) => {
+                        resolve(users);
+                    });
+                    socket.emit('fetchUsers', { userIDs, shardID });
+                })
+            )
     );
     console.log(results);
-    // https://stackoverflow.com/a/56757215/11856499
     return (results.flat() as UserData[]).filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
 };
 
@@ -105,62 +152,13 @@ type NotificationType = 'verification' | 'subscribed' | 'paid' | 'dms' | 'cancel
 
 export const sendPaypalNotification = (guildID: string, guildName: string, userID: string, notificationType: NotificationType): void => {
     getSockets()
-        .map(s => s[1].send({
-            event: 'paypalNotification',
-            notificationType,
-            guildID,
-            guildName,
-            userID,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            shardID: getShardOf(process.env.SUPPORT_SERVER_ID!)
-        }));
-};
-
-server.on('connect', (client: ServerSocket) => {
-    // Disconnect clients that do not match our specified client name.
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    if (!client.name?.startsWith(process.env.IPC_CLIENT_NAME!)) {
-        client.disconnect(true);
-    }
-
-    console.log(`[IPC] Client connected: ${client.name}`);
-});
-
-server.on('disconnect', (client: ServerSocket) => {
-    console.log(`[IPC] Client disconnected: ${client.name}`);
-});
-
-server.on('error', (error: Error | NetworkError, client: ServerSocket | null) => {
-    console.error(`[IPC] Client error: ${client?.name ?? 'unknown'}`, error);
-});
-
-server.on('message', async (message: NodeMessage) => {
-    const { event, data } = message.data;
-
-    if (event === 'collectData') {
-        const results = await Promise.all(
-            getSockets()
-                .map(s => s[1].send({
-                    event: 'collectData',
-                    data
-                }, { receptive: true }))
+        .map(([, socket]) =>
+            socket.emit('paypalNotification', {
+                notificationType,
+                guildID,
+                guildName,
+                userID,
+                shardID: getShardOf(process.env.SUPPORT_SERVER_ID!)
+            })
         );
-
-        message.reply((results as unknown as string[]).reduce((a, b) => a + b));
-    }
-
-    if (event === 'sendTo') {
-        const reply = await server.sendTo(message.data.to, data, { receptive: true });
-
-        message.reply(reply);
-    }
-});
-
-server.listen(process.env.IPC_SERVER_PORT ?? 4000).catch(console.error);
-
-setInterval(() => {
-    if (server.status != ServerStatus.Opened) {
-        console.log('Server is not opened, trying to reopen');
-        server.listen(process.env.IPC_SERVER_PORT ?? 4000).catch(console.error);
-    }
-}, 1000 * 10);
+};

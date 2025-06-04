@@ -463,11 +463,6 @@ binary-extensions@^2.0.0:
   resolved "https://registry.yarnpkg.com/binary-extensions/-/binary-extensions-2.3.0.tgz#f6e14a97858d327252200242d4ccfe522c445522"
   integrity sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==
 
-binarytf@^2.1.1:
-  version "2.1.3"
-  resolved "https://registry.yarnpkg.com/binarytf/-/binarytf-2.1.3.tgz#87ab823725526d14bb13ffab4ff5256875fba10e"
-  integrity sha512-3r/lCKKXhyh06cIrFI0OlZmTcVyB2D4Nf87uGs0mfYeRhsv67z/MeIzDCmSeXo7kglBx0c3grfmbcsz5cSo0rQ==
-
 body-parser@1.20.2:
   version "1.20.2"
   resolved "https://registry.yarnpkg.com/body-parser/-/body-parser-1.20.2.tgz#6feb0e21c4724d06de7ff38da36dad4f57a747fd"
@@ -2425,13 +2420,6 @@ vary@^1, vary@~1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/vary/-/vary-1.1.2.tgz#2299f02c6ded30d4a5961b0b9f74524a18f634fc"
   integrity sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==
-
-veza@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/veza/-/veza-1.2.0.tgz#8ad3ffe90b6272d513ccdff951f60e91c0544101"
-  integrity sha512-Ei91fQ5ymWFwwkqKA1mU4sfqgYeFVxPHSnzvXzjuCdsxSj2omesfJcBAlqHQIf8NbeS14o0eegh+0dVATavN3A==
-  dependencies:
-    binarytf "^2.1.1"
 
 webidl-conversions@^3.0.0:
   version "3.0.1"
