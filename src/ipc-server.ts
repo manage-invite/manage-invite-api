@@ -124,7 +124,7 @@ export const verifyPermissions = async (userID: string, permissionName: bigint, 
                     socket.once('verifyPermissionsResponse', (verifiedGuilds: string[]) => {
                         resolve(verifiedGuilds);
                     });
-                    socket.emit('verifyPermissions', { userID, permissionName, guildIDs });
+                    socket.emit('verifyPermissions', { userID, permissionName: permissionName.toString(), guildIDs });
                 })
             )
     );
